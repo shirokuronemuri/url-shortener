@@ -1,7 +1,7 @@
 services:
-  nest_starter_postgres_test: # Edit
+  url_shortener_postgres_test:
     image: postgres:alpine
-    container_name: nest_starter_postgres_test # Edit
+    container_name: url_shortener_postgres_test
     restart: no
     env_file:
       - .env.test
@@ -13,9 +13,9 @@ services:
     volumes:
       - postgres_data:/var/lib/postgresql/data
   
-  nest_starter_redis_test: # Edit
+  url_shortener_redis_test:
     image: redis:alpine
-    container_name: nest_starter_redis_test # Edit
+    container_name: url_shortener_redis_test
     restart: no
     command: redis-server --requirepass ${REDIS_PASSWORD}
     ports:
@@ -25,7 +25,7 @@ services:
 
 networks:
   default:
-    name: nest_starter_test # Edit
+    name: url_shortener_test
 
 volumes:
   postgres_data:
