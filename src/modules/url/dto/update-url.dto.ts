@@ -1,4 +1,6 @@
-import { PartialType } from '@nestjs/swagger';
-import { CreateUrlDto } from './create-url.dto';
+import { createZodDto } from 'nestjs-zod';
+import { createUrlSchema } from './create-url.dto';
 
-export class UpdateUrlDto extends PartialType(CreateUrlDto) {}
+const updateUrlSchema = createUrlSchema.partial();
+
+export class UpdateUrlDto extends createZodDto(updateUrlSchema) {}

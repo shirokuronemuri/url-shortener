@@ -12,8 +12,8 @@ async function bootstrap() {
   app.useLogger(app.get(LoggerService));
   app.use(helmet());
   const config = new DocumentBuilder()
-    .setTitle('Nest starter')
-    .setDescription('Nest starter')
+    .setTitle('Url shortener')
+    .setDescription('Shorten your urls with this super convenient API!')
     .setVersion('1.0')
     .build();
   const document = SwaggerModule.createDocument(app, config);
