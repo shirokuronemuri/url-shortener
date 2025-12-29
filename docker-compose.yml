@@ -1,0 +1,32 @@
+services:
+  nest_starter_postgres_dev: # Edit
+    image: postgres:alpine
+    container_name: nest_starter_postgres_dev # Edit
+    restart: always
+    env_file:
+      - .env
+    environment:
+      - POSTGRES_USER=${POSTGRES_USER}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+    ports:
+      - '5433:5432'
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+  
+  nest_starter_redis_dev: # Edit
+    image: redis:alpine
+    container_name: nest_starter_redis_dev # Edit
+    restart: always
+    command: redis-server --requirepass ${REDIS_PASSWORD}
+    ports:
+      - '6380:6379'
+    volumes:
+      - redis_data:/data
+
+networks:
+  default:
+    name: nest_starter_dev # Edit
+
+volumes:
+  postgres_data:
+  redis_data:

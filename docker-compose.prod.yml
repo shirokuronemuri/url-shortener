@@ -1,0 +1,40 @@
+services:
+  nest_starter_app: # Edit
+    image: ${DOCKERHUB_USERNAME}/nest-starter:latest # Edit
+    container_name: nest_starter_app # Edit
+    restart: always
+    env_file:
+      - .env.production
+    ports:
+      - "127.0.0.1:${PORT}:${PORT}"
+    depends_on:
+      - nest_starter_postgres # Edit
+      - nest_starter_redis # Edit
+
+  nest_starter_postgres: # Edit
+    image: postgres:alpine
+    container_name: nest_starter_postgres # Edit
+    restart: always
+    env_file:
+      - .env.production
+    environment:
+      - POSTGRES_USER=${POSTGRES_USER}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+  
+  nest_starter_redis: # Edit
+    image: redis:alpine
+    container_name: nest_starter_redis # Edit
+    command: redis-server --requirepass ${REDIS_PASSWORD}
+    restart: always
+    volumes:
+      - redis_data:/data
+
+networks:
+  default:
+    name: nest_starter # Edit
+
+volumes:
+  postgres_data:
+  redis_data:

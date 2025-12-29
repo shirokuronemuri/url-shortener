@@ -1,0 +1,20 @@
+generator client {
+  provider               = "prisma-client"
+  output                 = "./generated/prisma"
+  engineType             = "client"
+  moduleFormat           = "cjs"
+  // it won't run both server and tests without this
+  generatedFileExtension = "ts"
+  importFileExtension    = ""
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model User {
+  id        Int      @id @default(autoincrement())
+  email     String   @unique
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
