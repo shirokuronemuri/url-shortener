@@ -41,11 +41,11 @@ import KeyvRedis from '@keyv/redis';
     },
     {
       provide: APP_INTERCEPTOR,
-      useClass: ZodSerializerInterceptor,
+      useClass: TransformResponseInterceptor,
     },
     {
       provide: APP_INTERCEPTOR,
-      useClass: TransformResponseInterceptor,
+      useClass: ZodSerializerInterceptor,
     },
     {
       provide: APP_FILTER,

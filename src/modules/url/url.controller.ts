@@ -10,21 +10,22 @@ import {
 import { UrlService } from './url.service';
 import { CreateUrlDto } from './dto/create-url.dto';
 import { UpdateUrlDto } from './dto/update-url.dto';
-import { ApiBadRequestResponse, ApiCreatedResponse } from '@nestjs/swagger';
+import { ZodResponse } from 'nestjs-zod';
+import { UrlDto } from './dto/url.dto';
+import { convertDates } from 'src/helpers/convert-dates';
 
 @Controller('url')
 export class UrlController {
   constructor(private readonly urlService: UrlService) {}
 
-  @ApiCreatedResponse({
+  @ZodResponse({
+    type: UrlDto,
+    status: 201,
     description: 'Create new shortened url',
-  })
-  @ApiBadRequestResponse({
-    description: 'Schema validation failed',
   })
   @Post()
   create(@Body() createUrlDto: CreateUrlDto) {
-    return this.urlService.create(createUrlDto);
+    return this.urlService.create(createUrlDto).then(convertDates);
   }
 
   @Get()
