@@ -15,13 +15,12 @@ import { UpdateUrlDto } from './dto/update-url.dto';
 import { ZodResponse } from 'nestjs-zod';
 import { UrlDto } from './dto/url.dto';
 import { convertDates } from 'src/helpers/convert-dates';
-import type { Url } from 'src/database/generated/prisma/client';
 import type { Response } from 'express';
-import { ProcessUrlIdPipe } from './pipes/process-url-id/process-url-id.pipe';
 import {
   ApiNoContentResponse,
   ApiTemporaryRedirectResponse,
 } from '@nestjs/swagger';
+import { IdParamDto } from './dto/id-param.dto';
 
 @Controller()
 export class UrlController {
@@ -55,9 +54,8 @@ export class UrlController {
     description: 'Returns single url object by its short id',
   })
   @Get('url/:id')
-  findOne(@Param('id', ProcessUrlIdPipe) url: Url) {
-    return convertDates(url);
-    // return this.urlService.findOne(url).then(convertDates);
+  findOne(@Param() { id }: IdParamDto) {
+    return this.urlService.findOne(id).then(convertDates);
   }
 
   @ApiTemporaryRedirectResponse({
@@ -65,11 +63,8 @@ export class UrlController {
   })
   @HttpCode(301)
   @Get(':id')
-  redirect(
-    @Param('id', ProcessUrlIdPipe) url: Url,
-    @Res() res: Response,
-  ): void {
-    return res.redirect(url.redirect);
+  redirect(@Param() { id }: IdParamDto, @Res() res: Response) {
+    return this.urlService.redirect(id, res);
   }
 
   @ZodResponse({
@@ -78,11 +73,8 @@ export class UrlController {
     description: 'Returns updated url object',
   })
   @Patch('url/:id')
-  update(
-    @Param('id', ProcessUrlIdPipe) url: Url,
-    @Body() updateUrlDto: UpdateUrlDto,
-  ) {
-    return this.urlService.update(url, updateUrlDto).then(convertDates);
+  update(@Param() { id }: IdParamDto, @Body() updateUrlDto: UpdateUrlDto) {
+    return this.urlService.update(id, updateUrlDto).then(convertDates);
   }
 
   @ApiNoContentResponse({
@@ -90,7 +82,7 @@ export class UrlController {
   })
   @Delete('url/:id')
   @HttpCode(204)
-  remove(@Param('id', ProcessUrlIdPipe) url: Url) {
-    return this.urlService.remove(url);
+  remove(@Param() { id }: IdParamDto) {
+    return this.urlService.remove(id);
   }
 }
