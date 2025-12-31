@@ -8,6 +8,7 @@ import {
   Delete,
   Res,
   HttpCode,
+  Query,
 } from '@nestjs/common';
 import { UrlService } from './url.service';
 import { CreateUrlDto } from './dto/create-url.dto';
@@ -21,6 +22,8 @@ import {
   ApiTemporaryRedirectResponse,
 } from '@nestjs/swagger';
 import { IdParamDto } from './dto/id-param.dto';
+import { QueryParamDto } from './dto/query-param.dto';
+import { UrlArrayDto } from './dto/url-array.dto';
 
 @Controller()
 export class UrlController {
@@ -37,15 +40,17 @@ export class UrlController {
   }
 
   @ZodResponse({
-    type: [UrlDto],
+    type: UrlArrayDto,
     status: 200,
     description: 'Returns all created urls',
   })
   @Get('url')
-  findAll() {
-    return this.urlService
-      .findAll()
-      .then((urls) => urls.map((url) => convertDates(url)));
+  async findAll(@Query() queryParams: QueryParamDto) {
+    const result = await this.urlService.findAll(queryParams);
+    return {
+      data: result.data.map((url) => convertDates(url)),
+      meta: result.meta,
+    };
   }
 
   @ZodResponse({

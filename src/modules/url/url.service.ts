@@ -5,6 +5,8 @@ import { ConfigService } from '@nestjs/config';
 import { IdGeneratorService } from 'src/services/id-generator/id-generator.service';
 import { DatabaseService } from 'src/database/database.service';
 import { Response } from 'express';
+import { QueryParamDto } from './dto/query-param.dto';
+import { generatePaginationLinks } from 'src/helpers/generate-pagination-links';
 
 @Injectable()
 export class UrlService {
@@ -26,8 +28,47 @@ export class UrlService {
     return response;
   }
 
-  async findAll() {
-    return await this.db.url.findMany();
+  async findAll({ limit = 10, page = 1, filter }: QueryParamDto) {
+    const whereClause = {
+      where: {
+        OR: [
+          {
+            title: { contains: filter },
+          },
+          {
+            description: { contains: filter },
+          },
+          {
+            redirect: { contains: filter },
+          },
+        ],
+      },
+    };
+    const results = await this.db.url.findMany({
+      take: limit,
+      skip: (page - 1) * limit,
+      ...(filter && whereClause),
+    });
+    const totalCount = await this.db.url.count({ ...(filter && whereClause) });
+    const totalPages = Math.ceil(totalCount / limit);
+    const { nextPage, previousPage } = generatePaginationLinks({
+      host: this.config.get('host') || '',
+      limit,
+      page,
+      filter,
+      totalPages,
+    });
+    return {
+      data: results,
+      meta: {
+        totalCount,
+        currentPage: page,
+        totalPages,
+        perPage: limit,
+        nextPage,
+        previousPage,
+      },
+    };
   }
 
   async findOne(id: string) {
