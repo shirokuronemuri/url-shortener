@@ -4,6 +4,7 @@ import { UpdateUrlDto } from './dto/update-url.dto';
 import { ConfigService } from '@nestjs/config';
 import { IdGeneratorService } from 'src/services/id-generator/id-generator.service';
 import { DatabaseService } from 'src/database/database.service';
+import type { Url } from 'src/database/generated/prisma/client';
 
 @Injectable()
 export class UrlService {
@@ -25,19 +26,37 @@ export class UrlService {
     return response;
   }
 
-  findAll() {
-    return `This action returns all url`;
+  async findAll() {
+    return await this.db.url.findMany();
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} url`;
+  // async findOne(url: string) {
+  //   const result = await this.db.url.findUnique({
+  //     where: {
+  //       url,
+  //     },
+  //   });
+  //   if (!result) throw new Error();
+  //   return result;
+  // }
+
+  async update(url: Url, updateUrlDto: UpdateUrlDto) {
+    const updatedUrl = await this.db.url.update({
+      where: {
+        id: url.id,
+      },
+      data: {
+        ...updateUrlDto,
+      },
+    });
+    return updatedUrl;
   }
 
-  update(id: number, updateUrlDto: UpdateUrlDto) {
-    return `This action updates a #${id} url`;
-  }
-
-  remove(id: number) {
-    return `This action removes a #${id} url`;
+  async remove(url: Url) {
+    await this.db.url.delete({
+      where: {
+        id: url.id,
+      },
+    });
   }
 }

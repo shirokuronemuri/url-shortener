@@ -6,6 +6,8 @@ import {
   Patch,
   Param,
   Delete,
+  Res,
+  HttpCode,
 } from '@nestjs/common';
 import { UrlService } from './url.service';
 import { CreateUrlDto } from './dto/create-url.dto';
@@ -13,38 +15,82 @@ import { UpdateUrlDto } from './dto/update-url.dto';
 import { ZodResponse } from 'nestjs-zod';
 import { UrlDto } from './dto/url.dto';
 import { convertDates } from 'src/helpers/convert-dates';
+import type { Url } from 'src/database/generated/prisma/client';
+import type { Response } from 'express';
+import { ProcessUrlIdPipe } from './pipes/process-url-id/process-url-id.pipe';
+import {
+  ApiNoContentResponse,
+  ApiTemporaryRedirectResponse,
+} from '@nestjs/swagger';
 
-@Controller('url')
+@Controller()
 export class UrlController {
   constructor(private readonly urlService: UrlService) {}
 
   @ZodResponse({
     type: UrlDto,
     status: 201,
-    description: 'Create new shortened url',
+    description: 'Creates new shortened url',
   })
-  @Post()
+  @Post('url')
   create(@Body() createUrlDto: CreateUrlDto) {
     return this.urlService.create(createUrlDto).then(convertDates);
   }
 
-  @Get()
+  @ZodResponse({
+    type: [UrlDto],
+    status: 200,
+    description: 'Returns all created urls',
+  })
+  @Get('url')
   findAll() {
-    return this.urlService.findAll();
+    return this.urlService
+      .findAll()
+      .then((urls) => urls.map((url) => convertDates(url)));
   }
 
+  @ZodResponse({
+    type: UrlDto,
+    status: 200,
+    description: 'Returns single url object by its short id',
+  })
+  @Get('url/:id')
+  findOne(@Param('id', ProcessUrlIdPipe) url: Url) {
+    return convertDates(url);
+    // return this.urlService.findOne(url).then(convertDates);
+  }
+
+  @ApiTemporaryRedirectResponse({
+    description: 'Redirects the user to the link stored in id',
+  })
+  @HttpCode(301)
   @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.urlService.findOne(+id);
+  redirect(
+    @Param('id', ProcessUrlIdPipe) url: Url,
+    @Res() res: Response,
+  ): void {
+    return res.redirect(url.redirect);
   }
 
-  @Patch(':id')
-  update(@Param('id') id: string, @Body() updateUrlDto: UpdateUrlDto) {
-    return this.urlService.update(+id, updateUrlDto);
+  @ZodResponse({
+    type: UrlDto,
+    status: 200,
+    description: 'Returns updated url object',
+  })
+  @Patch('url/:id')
+  update(
+    @Param('id', ProcessUrlIdPipe) url: Url,
+    @Body() updateUrlDto: UpdateUrlDto,
+  ) {
+    return this.urlService.update(url, updateUrlDto).then(convertDates);
   }
 
-  @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.urlService.remove(+id);
+  @ApiNoContentResponse({
+    description: 'Removes the url',
+  })
+  @Delete('url/:id')
+  @HttpCode(204)
+  remove(@Param('id', ProcessUrlIdPipe) url: Url) {
+    return this.urlService.remove(url);
   }
 }
