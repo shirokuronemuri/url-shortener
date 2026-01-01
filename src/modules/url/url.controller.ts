@@ -9,6 +9,7 @@ import {
   Res,
   HttpCode,
   Query,
+  UseGuards,
 } from '@nestjs/common';
 import { UrlService } from './url.service';
 import { CreateUrlDto } from './dto/create-url.dto';
@@ -19,11 +20,14 @@ import { convertDates } from 'src/helpers/convert-dates';
 import type { Response } from 'express';
 import {
   ApiNoContentResponse,
+  ApiSecurity,
   ApiTemporaryRedirectResponse,
 } from '@nestjs/swagger';
 import { IdParamDto } from './dto/id-param.dto';
 import { QueryParamDto } from './dto/query-param.dto';
 import { UrlArrayDto } from './dto/url-array.dto';
+import { TokenId } from 'src/decorators/token-id.decorator';
+import { AuthGuard } from '../token/auth/auth.guard';
 
 @Controller()
 export class UrlController {
@@ -35,8 +39,10 @@ export class UrlController {
     description: 'Creates new shortened url',
   })
   @Post('url')
-  create(@Body() createUrlDto: CreateUrlDto) {
-    return this.urlService.create(createUrlDto).then(convertDates);
+  @ApiSecurity('apiKey')
+  @UseGuards(AuthGuard)
+  create(@Body() createUrlDto: CreateUrlDto, @TokenId() tokenId: string) {
+    return this.urlService.create(createUrlDto, tokenId).then(convertDates);
   }
 
   @ZodResponse({
@@ -45,8 +51,13 @@ export class UrlController {
     description: 'Returns all created urls',
   })
   @Get('url')
-  async findAll(@Query() queryParams: QueryParamDto) {
-    const result = await this.urlService.findAll(queryParams);
+  @ApiSecurity('apiKey')
+  @UseGuards(AuthGuard)
+  async findAll(
+    @Query() queryParams: QueryParamDto,
+    @TokenId() tokenId: string,
+  ) {
+    const result = await this.urlService.findAll(queryParams, tokenId);
     return {
       data: result.data.map((url) => convertDates(url)),
       meta: result.meta,
@@ -59,8 +70,10 @@ export class UrlController {
     description: 'Returns single url object by its short id',
   })
   @Get('url/:id')
-  findOne(@Param() { id }: IdParamDto) {
-    return this.urlService.findOne(id).then(convertDates);
+  @ApiSecurity('apiKey')
+  @UseGuards(AuthGuard)
+  findOne(@Param() { id }: IdParamDto, @TokenId() tokenId: string) {
+    return this.urlService.findOne(id, tokenId).then(convertDates);
   }
 
   @ApiTemporaryRedirectResponse({
@@ -78,16 +91,24 @@ export class UrlController {
     description: 'Returns updated url object',
   })
   @Patch('url/:id')
-  update(@Param() { id }: IdParamDto, @Body() updateUrlDto: UpdateUrlDto) {
-    return this.urlService.update(id, updateUrlDto).then(convertDates);
+  @ApiSecurity('apiKey')
+  @UseGuards(AuthGuard)
+  update(
+    @Param() { id }: IdParamDto,
+    @Body() updateUrlDto: UpdateUrlDto,
+    @TokenId() tokenId: string,
+  ) {
+    return this.urlService.update(id, updateUrlDto, tokenId).then(convertDates);
   }
 
   @ApiNoContentResponse({
     description: 'Removes the url',
   })
   @Delete('url/:id')
+  @ApiSecurity('apiKey')
   @HttpCode(204)
-  remove(@Param() { id }: IdParamDto) {
-    return this.urlService.remove(id);
+  @UseGuards(AuthGuard)
+  remove(@Param() { id }: IdParamDto, @TokenId() tokenId: string) {
+    return this.urlService.remove(id, tokenId);
   }
 }

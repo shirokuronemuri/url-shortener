@@ -15,9 +15,22 @@ async function bootstrap() {
     .setTitle('Url shortener')
     .setDescription('Shorten your urls with this super convenient API!')
     .setVersion('1.0')
+    .addApiKey(
+      {
+        type: 'apiKey',
+        name: 'x-api-key',
+        in: 'header',
+      },
+      'apiKey',
+    )
+    .addTag('Url', 'Manage and access short URLs')
     .build();
   const document = SwaggerModule.createDocument(app, config);
-  SwaggerModule.setup('docs', app, cleanupOpenApiDoc(document));
+  SwaggerModule.setup('docs', app, cleanupOpenApiDoc(document), {
+    swaggerOptions: {
+      persistAuthorization: true,
+    },
+  });
   await app.listen(process.env.PORT ?? 3000);
 }
 void bootstrap();

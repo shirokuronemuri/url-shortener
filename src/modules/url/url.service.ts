@@ -16,21 +16,26 @@ export class UrlService {
     private readonly db: DatabaseService,
   ) {}
 
-  async create(createUrlDto: CreateUrlDto) {
+  async create(createUrlDto: CreateUrlDto, tokenId: string) {
     const id = this.idGenerator.generate(5);
     const url = `${this.config.get('host')}/${id}`;
     const response = await this.db.url.create({
       data: {
         ...createUrlDto,
         url,
+        tokenId,
       },
     });
     return response;
   }
 
-  async findAll({ limit = 10, page = 1, filter }: QueryParamDto) {
+  async findAll(
+    { limit = 10, page = 1, filter }: QueryParamDto,
+    tokenId: string,
+  ) {
     const whereClause = {
       where: {
+        tokenId,
         OR: [
           {
             title: { contains: filter },
