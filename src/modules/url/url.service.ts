@@ -116,7 +116,7 @@ export class UrlService {
     });
   }
 
-  async findOrThrow(id: string, tokenId: string) {
+  private async findOrThrow(id: string, tokenId: string) {
     const url = await this.db.url.findUnique({
       where: {
         url: `${this.config.get('host')}/${id}`,

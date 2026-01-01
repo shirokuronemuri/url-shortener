@@ -1,8 +1,13 @@
-# nest-starter
+# url-shortener
 
 ## Description
 
-[Nest](https://github.com/nestjs/nest) framework starter project. It includes test coverage, some middlewares, request body validation with zod, logging, prisma + postgres, redis caching and github actions for automated testing and deployment to a remote server.
+Url shortener API built with NestJS, Zod and Prisma. 
+
+[Check out the docs](http://url.nemunemu.dev/docs) for details or build the project locally.
+Test coverage and automatic deployment is included.
+
+Also check out the [wiki](https://github.com/shirokuronemuri/url-shortener/wiki/Todo) page for future development plans.
 
 ## Dev setup
 
@@ -28,7 +33,7 @@ create `.env.production` file based on `.env.example`, then:
 ```bash
 # build the app image and upload it to docker hub (you need to login with the username you specified in .env.production)
 $ pnpm d:build:prod
-$ docker tag nest-starter:latest [yourusername]/nest-starter:latest
+$ docker tag url-shortener:latest [yourusername]/url-shortener:latest
 
 # then copy .env.production, package.json and docker-compose.prod.yml to your server and run the containers
 $ pnpm d:up:prod

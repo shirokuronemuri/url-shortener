@@ -24,6 +24,7 @@ async function bootstrap() {
       'apiKey',
     )
     .addTag('Url', 'Manage and access short URLs')
+    .addTag('Token', 'Get API token to access the rest of API')
     .build();
   const document = SwaggerModule.createDocument(app, config);
   SwaggerModule.setup('docs', app, cleanupOpenApiDoc(document), {
