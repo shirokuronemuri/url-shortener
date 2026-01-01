@@ -76,18 +76,26 @@ export class UrlService {
     };
   }
 
-  async findOne(id: string) {
-    const url = await this.findOrThrow(id);
+  async findOne(id: string, tokenId: string) {
+    const url = await this.findOrThrow(id, tokenId);
     return url;
   }
 
   async redirect(id: string, res: Response) {
-    const url = await this.findOrThrow(id);
+    const url = await this.db.url.findUnique({
+      where: {
+        url: `${this.config.get('host')}/${id}`,
+      },
+    });
+    if (!url) {
+      throw new NotFoundException();
+    }
+
     res.redirect(url.redirect);
   }
 
-  async update(id: string, updateUrlDto: UpdateUrlDto) {
-    const url = await this.findOrThrow(id);
+  async update(id: string, updateUrlDto: UpdateUrlDto, tokenId: string) {
+    const url = await this.findOrThrow(id, tokenId);
     const updatedUrl = await this.db.url.update({
       where: {
         id: url.id,
@@ -99,8 +107,8 @@ export class UrlService {
     return updatedUrl;
   }
 
-  async remove(id: string) {
-    const url = await this.findOrThrow(id);
+  async remove(id: string, tokenId: string) {
+    const url = await this.findOrThrow(id, tokenId);
     await this.db.url.delete({
       where: {
         id: url.id,
@@ -108,10 +116,11 @@ export class UrlService {
     });
   }
 
-  async findOrThrow(id: string) {
+  async findOrThrow(id: string, tokenId: string) {
     const url = await this.db.url.findUnique({
       where: {
         url: `${this.config.get('host')}/${id}`,
+        tokenId,
       },
     });
     if (!url) {
