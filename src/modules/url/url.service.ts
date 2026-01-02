@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Inject, Injectable, NotFoundException } from '@nestjs/common';
 import { CreateUrlDto } from './dto/create-url.dto';
 import { UpdateUrlDto } from './dto/update-url.dto';
 import { ConfigService } from '@nestjs/config';
@@ -7,6 +7,8 @@ import { DatabaseService } from 'src/database/database.service';
 import { Response } from 'express';
 import { QueryParamDto } from './dto/query-param.dto';
 import { generatePaginationLinks } from 'src/helpers/generate-pagination-links';
+import { Cache, CACHE_MANAGER } from '@nestjs/cache-manager';
+import { CachedUrl } from './types/types';
 
 @Injectable()
 export class UrlService {
@@ -14,6 +16,7 @@ export class UrlService {
     private readonly config: ConfigService,
     private readonly idGenerator: IdGeneratorService,
     private readonly db: DatabaseService,
+    @Inject(CACHE_MANAGER) private readonly cache: Cache,
   ) {}
 
   async create(createUrlDto: CreateUrlDto, tokenId: string) {
@@ -82,6 +85,11 @@ export class UrlService {
   }
 
   async redirect(id: string, res: Response) {
+    const cachedValue = await this.cache.get<CachedUrl>(`redirect:${id}`);
+    if (cachedValue) {
+      return res.redirect(cachedValue.redirect);
+    }
+
     const url = await this.db.url.findUnique({
       where: {
         url: `${this.config.get('host')}/${id}`,
@@ -90,8 +98,13 @@ export class UrlService {
     if (!url) {
       throw new NotFoundException();
     }
+    await this.cache.set(
+      `redirect:${id}`,
+      { redirect: url.redirect },
+      3600 * 1000,
+    );
 
-    res.redirect(url.redirect);
+    return res.redirect(url.redirect);
   }
 
   async update(id: string, updateUrlDto: UpdateUrlDto, tokenId: string) {
@@ -104,6 +117,7 @@ export class UrlService {
         ...updateUrlDto,
       },
     });
+    await this.cache.del(`redirect:${id}`);
     return updatedUrl;
   }
 
@@ -114,6 +128,7 @@ export class UrlService {
         id: url.id,
       },
     });
+    await this.cache.del(`redirect:${id}`);
   }
 
   private async findOrThrow(id: string, tokenId: string) {
