@@ -1,4 +1,4 @@
-import { Inject, Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { CreateUrlDto } from './dto/create-url.dto';
 import { UpdateUrlDto } from './dto/update-url.dto';
 import { ConfigService } from '@nestjs/config';
@@ -7,8 +7,8 @@ import { DatabaseService } from 'src/database/database.service';
 import { Response } from 'express';
 import { QueryParamDto } from './dto/query-param.dto';
 import { generatePaginationLinks } from 'src/helpers/generate-pagination-links';
-import { Cache, CACHE_MANAGER } from '@nestjs/cache-manager';
 import { CachedUrl } from './types/types';
+import { RedisService } from 'src/redis/redis.service';
 
 @Injectable()
 export class UrlService {
@@ -16,16 +16,15 @@ export class UrlService {
     private readonly config: ConfigService,
     private readonly idGenerator: IdGeneratorService,
     private readonly db: DatabaseService,
-    @Inject(CACHE_MANAGER) private readonly cache: Cache,
+    private readonly redis: RedisService,
   ) {}
 
   async create(createUrlDto: CreateUrlDto, tokenId: string) {
     const id = this.idGenerator.generate(5);
-    const url = `${this.config.get('host')}/${id}`;
     const response = await this.db.url.create({
       data: {
         ...createUrlDto,
-        url,
+        url: id,
         tokenId,
       },
     });
@@ -85,23 +84,16 @@ export class UrlService {
   }
 
   async redirect(id: string, res: Response) {
-    const cachedValue = await this.cache.get<CachedUrl>(`redirect:${id}`);
+    const cachedValue = await this.redis.getJSON<CachedUrl>(`redirect:${id}`);
     if (cachedValue) {
       return res.redirect(cachedValue.redirect);
     }
 
-    const url = await this.db.url.findUnique({
-      where: {
-        url: `${this.config.get('host')}/${id}`,
-      },
-    });
-    if (!url) {
-      throw new NotFoundException();
-    }
-    await this.cache.set(
+    const url = await this.findOrThrow(id);
+    await this.redis.setJSON(
       `redirect:${id}`,
       { redirect: url.redirect },
-      3600 * 1000,
+      3600,
     );
 
     return res.redirect(url.redirect);
@@ -117,7 +109,7 @@ export class UrlService {
         ...updateUrlDto,
       },
     });
-    await this.cache.del(`redirect:${id}`);
+    await this.redis.client.del(`redirect:${id}`);
     return updatedUrl;
   }
 
@@ -128,14 +120,15 @@ export class UrlService {
         id: url.id,
       },
     });
-    await this.cache.del(`redirect:${id}`);
+    await this.redis.client.del(`redirect:${id}`);
+    await this.redis.client.del(`clicks:${id}`);
   }
 
-  private async findOrThrow(id: string, tokenId: string) {
+  private async findOrThrow(id: string, tokenId?: string) {
     const url = await this.db.url.findUnique({
       where: {
-        url: `${this.config.get('host')}/${id}`,
-        tokenId,
+        url: id,
+        ...(tokenId && { tokenId }),
       },
     });
     if (!url) {
