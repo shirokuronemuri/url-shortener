@@ -84,6 +84,7 @@ export class UrlService {
   }
 
   async redirect(id: string, res: Response) {
+    await this.redis.client.incr(`clicks:${id}`);
     const cachedValue = await this.redis.getJSON<CachedUrl>(`redirect:${id}`);
     if (cachedValue) {
       return res.redirect(cachedValue.redirect);

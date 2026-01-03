@@ -3,7 +3,7 @@ import { z } from 'zod';
 
 export const urlSchema = z.object({
   redirect: z.url(),
-  url: z.url(),
+  url: z.string(),
   title: z.string().nonempty(),
   description: z.string().nullable().optional(),
   createdAt: z.iso.datetime(),

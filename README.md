@@ -5,7 +5,7 @@
 Url shortener API built with NestJS, Zod and Prisma. 
 
 [Check out the docs](http://url.nemunemu.dev/docs) for details or build the project locally.
-Test coverage and automatic deployment is included.
+Test coverage and automatic deployment is included. Right now API tokens are handed out manually, please email me if you want to get one.
 
 Also check out the [wiki](https://github.com/shirokuronemuri/url-shortener/wiki/Todo) page for future development plans.
 

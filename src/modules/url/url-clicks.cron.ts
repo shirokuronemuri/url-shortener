@@ -11,24 +11,69 @@ export class UrlClicksCron {
     private readonly redis: RedisService,
     private readonly logger: LoggerService,
   ) {}
-  @Cron('*/15 * * * * *')
+  @Cron('*/5 * * * *')
   async flushClicks() {
     this.logger.log('Executing flushClicks CRON job...', UrlClicksCron.name);
-    const urlKeys = (
-      await this.redis.client.scan(0, 'MATCH', 'clicks:*', 'COUNT', 100)
-    )[1]
+    let cursor = '0';
+    const rawKeys: string[] = [];
+    do {
+      const [next, keys] = await this.redis.client.scan(
+        cursor,
+        'MATCH',
+        'clicks:*',
+        'COUNT',
+        100,
+      );
+      rawKeys.push(...keys);
+      cursor = next;
+    } while (cursor !== '0');
+    const urlKeys = rawKeys
       .map((key) => key.split(':')[1])
       .filter((key) => key !== undefined);
-    const pipeline = this.redis.client.pipeline();
-    urlKeys.forEach((key) => {
-      pipeline.getdel(key);
-    });
-    const values = await pipeline.exec();
 
-    if (!values) {
+    if (urlKeys.length === 0) {
+      this.logger.log(
+        `flushClicks CRON job execution finished; nothing to flush`,
+        UrlClicksCron.name,
+      );
       return;
     }
-    // todo map values and output errors
-    // todo write executeraw script
+
+    const pipeline = this.redis.client.pipeline();
+    urlKeys.forEach((key) => {
+      pipeline.getdel(`clicks:${key}`);
+    });
+    const stringValues = await pipeline.exec();
+
+    const counterValues = stringValues
+      ? stringValues.map(([err, val]) => {
+          if (err) {
+            this.logger.error(err.message, err.stack, UrlClicksCron.name);
+          }
+          return val === null || isNaN(Number(val)) ? 0 : Number(val);
+        })
+      : [];
+    const queryValues = urlKeys
+      .map((key, i) => ({
+        url: key,
+        value: counterValues[i],
+      }))
+      .map((row) => `('${row.url}', ${row.value})`)
+      .join(', ');
+
+    // Single operation to avoid race conditions
+    const updatedRows = await this.db.$executeRawUnsafe(`
+      UPDATE "Url" as u
+      SET clicks = u.clicks + v.delta
+      FROM (
+        VALUES ${queryValues}
+      ) AS v(url, delta)
+      WHERE u.url = v.url
+      `);
+
+    this.logger.log(
+      `flushClicks CRON job execution finished; updated ${updatedRows} row counters`,
+      UrlClicksCron.name,
+    );
   }
 }

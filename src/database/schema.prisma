@@ -18,6 +18,7 @@ model Url {
   url         String   @unique
   title       String
   description String?
+  clicks      Int      @default(0)
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
   tokenId     String
