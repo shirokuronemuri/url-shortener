@@ -12,9 +12,9 @@ import { ZodSerializerInterceptor, ZodValidationPipe } from 'nestjs-zod';
 import { HttpExceptionFilter } from './filters/http-exception/http-exception.filter';
 import { LoggerService } from './services/logger/logger.service';
 import { LoggerMiddleware } from './middlewares/logger/logger.middleware';
-import { DatabaseService } from 'src/database/database.service';
-import { RedisService } from 'src/redis/redis.service';
-import { RedisProvider } from 'src/redis/redis.provider';
+import { DatabaseService } from 'src/services/database/database.service';
+import { RedisService } from 'src/services/redis/redis.service';
+import { RedisProvider } from 'src/services/redis/redis.provider';
 
 @Global()
 @Module({

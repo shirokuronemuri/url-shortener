@@ -1,6 +1,6 @@
 import { Test, type TestingModule } from '@nestjs/testing';
 import { TestService } from './test.service';
-import { DatabaseService } from 'src/database/database.service';
+import { DatabaseService } from 'src/services/database/database.service';
 import { mockDeep } from 'jest-mock-extended';
 import { CACHE_MANAGER, type Cache } from '@nestjs/cache-manager';
 

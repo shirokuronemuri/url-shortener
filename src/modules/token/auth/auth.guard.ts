@@ -1,6 +1,6 @@
 import { CanActivate, ExecutionContext, Injectable } from '@nestjs/common';
 import { Request } from 'express';
-import { DatabaseService } from 'src/database/database.service';
+import { DatabaseService } from 'src/services/database/database.service';
 import { TokenService } from 'src/modules/token/token.service';
 
 @Injectable()

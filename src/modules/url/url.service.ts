@@ -1,20 +1,22 @@
 import {
   BadRequestException,
   Injectable,
+  InternalServerErrorException,
   NotFoundException,
 } from '@nestjs/common';
 import { CreateUrlDto } from './dto/create-url.dto';
 import { UpdateUrlDto } from './dto/update-url.dto';
 import { ConfigService } from '@nestjs/config';
 import { IdGeneratorService } from 'src/services/id-generator/id-generator.service';
-import { DatabaseService } from 'src/database/database.service';
+import { DatabaseService } from 'src/services/database/database.service';
 import { Response } from 'express';
 import { QueryParamDto } from './dto/query-param.dto';
 import { generatePaginationLinks } from 'src/helpers/generate-pagination-links';
 import { CachedUrl } from './types/types';
-import { RedisService } from 'src/redis/redis.service';
+import { RedisService } from 'src/services/redis/redis.service';
 import dns from 'node:dns/promises';
 import ipaddr from 'ipaddr.js';
+import { PrismaClientKnownRequestError } from '@prisma/client/runtime/client';
 
 @Injectable()
 export class UrlService {
@@ -31,15 +33,26 @@ export class UrlService {
         'Specified redirect IP is in private range',
       );
     }
-    const id = this.idGenerator.generate(5);
-    const response = await this.db.url.create({
-      data: {
-        ...createUrlDto,
-        url: id,
-        tokenId,
-      },
-    });
-    return response;
+    const MAX_RETRIES = 5;
+    for (let i = 0; i < MAX_RETRIES; ++i) {
+      const id = this.idGenerator.generate(5);
+      try {
+        return this.db.url.create({
+          data: {
+            ...createUrlDto,
+            url: id,
+            tokenId,
+          },
+        });
+      } catch (e) {
+        // unique constraint failed
+        if (e instanceof PrismaClientKnownRequestError && e.code === 'P2002') {
+          continue;
+        }
+        throw e;
+      }
+    }
+    throw new InternalServerErrorException('Failed to generate short url');
   }
 
   async findAll(

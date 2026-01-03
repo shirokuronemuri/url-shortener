@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import crypto from 'node:crypto';
-import { DatabaseService } from 'src/database/database.service';
+import { DatabaseService } from 'src/services/database/database.service';
 
 @Injectable()
 export class TokenService {

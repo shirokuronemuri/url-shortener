@@ -1,8 +1,8 @@
 import { Injectable } from '@nestjs/common';
 import { Cron } from '@nestjs/schedule';
 import { LoggerService } from 'src/core/services/logger/logger.service';
-import { DatabaseService } from 'src/database/database.service';
-import { RedisService } from 'src/redis/redis.service';
+import { DatabaseService } from 'src/services/database/database.service';
+import { RedisService } from 'src/services/redis/redis.service';
 
 @Injectable()
 export class UrlClicksCron {
