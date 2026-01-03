@@ -1,4 +1,8 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import {
+  BadRequestException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { CreateUrlDto } from './dto/create-url.dto';
 import { UpdateUrlDto } from './dto/update-url.dto';
 import { ConfigService } from '@nestjs/config';
@@ -9,6 +13,8 @@ import { QueryParamDto } from './dto/query-param.dto';
 import { generatePaginationLinks } from 'src/helpers/generate-pagination-links';
 import { CachedUrl } from './types/types';
 import { RedisService } from 'src/redis/redis.service';
+import dns from 'node:dns/promises';
+import ipaddr from 'ipaddr.js';
 
 @Injectable()
 export class UrlService {
@@ -20,6 +26,11 @@ export class UrlService {
   ) {}
 
   async create(createUrlDto: CreateUrlDto, tokenId: string) {
+    if (await this.isPrivateIp(createUrlDto.redirect)) {
+      throw new BadRequestException(
+        'Specified redirect IP is in private range',
+      );
+    }
     const id = this.idGenerator.generate(5);
     const response = await this.db.url.create({
       data: {
@@ -137,5 +148,29 @@ export class UrlService {
     }
 
     return url;
+  }
+
+  private async isPrivateIp(url: string): Promise<boolean> {
+    try {
+      let hostname = new URL(url).hostname;
+      if (hostname.startsWith('[') && hostname.endsWith(']')) {
+        hostname = hostname.slice(1, -1);
+      }
+      const ips = await dns.lookup(hostname, { all: true });
+      const privateRanges = [
+        'private',
+        'loopback',
+        'linkLocal',
+        'uniqueLocal',
+        'unspecified',
+        'carrierGradeNat',
+      ];
+      return ips.some((ip) => {
+        const range = ipaddr.parse(ip.address).range();
+        return privateRanges.includes(range);
+      });
+    } catch {
+      return true;
+    }
   }
 }
