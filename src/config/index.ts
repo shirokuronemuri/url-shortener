@@ -1,4 +1,3 @@
-import z from 'zod';
 import { envSchema } from './env.schema';
 import { appConfig } from './app.config';
 import { urlConfig } from './url.config';

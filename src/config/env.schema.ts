@@ -15,6 +15,8 @@ export const envSchema = z.object({
   URL_LENGTH: z.coerce.number().optional(),
   TOKEN_ID_LENGTH: z.coerce.number().optional(),
   CRON_FLUSH_CLICKS_INTERVAL: z.string().optional(),
+  URL_GENERATION_MAX_RETRIES: z.coerce.number().optional(),
+  TOKEN_GENERATION_MAX_RETRIES: z.coerce.number().optional(),
 });
 
 export type Env = z.infer<typeof envSchema>;

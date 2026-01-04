@@ -1,17 +1,30 @@
-import { Injectable } from '@nestjs/common';
-import { Cron } from '@nestjs/schedule';
+import { Injectable, OnModuleInit } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
+import { SchedulerRegistry } from '@nestjs/schedule';
+import { CronJob } from 'cron';
 import { LoggerService } from 'src/core/services/logger/logger.service';
 import { DatabaseService } from 'src/services/database/database.service';
 import { RedisService } from 'src/services/redis/redis.service';
 
 @Injectable()
-export class UrlClicksCron {
+export class UrlClicksCron implements OnModuleInit {
   constructor(
     private readonly db: DatabaseService,
     private readonly redis: RedisService,
     private readonly logger: LoggerService,
+    private readonly config: ConfigService,
+    private readonly schedulerRegistry: SchedulerRegistry,
   ) {}
-  @Cron('*/5 * * * *')
+  onModuleInit() {
+    const schedule = this.config.getOrThrow<string>('cron.flushClicksInterval');
+    const job = new CronJob(schedule, async () => {
+      await this.flushClicks();
+    });
+    this.schedulerRegistry.addCronJob('flush-clicks-job', job);
+    job.start();
+    this.logger.log('flushClicks CRON job started', UrlClicksCron.name);
+  }
+
   async flushClicks() {
     this.logger.log('Executing flushClicks CRON job...', UrlClicksCron.name);
     let cursor = '0';
