@@ -5,8 +5,8 @@ import winston from 'winston';
 @Injectable()
 export class LoggerService implements NestLogger {
   private logger: winston.Logger;
-  constructor(private readonly configService: ConfigService) {
-    const isDevelopmentEnv = configService.get('environment') === 'development';
+  constructor(private readonly config: ConfigService) {
+    const isDevelopmentEnv = config.get('app.environment') === 'development';
 
     const { timestamp, json, colorize, combine, printf } = winston.format;
 

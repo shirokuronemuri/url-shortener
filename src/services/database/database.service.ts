@@ -18,7 +18,7 @@ export class DatabaseService
     private readonly logger: LoggerService,
   ) {
     const adapter = new PrismaPg({
-      connectionString: config.get<string>('dbUrl'),
+      connectionString: config.getOrThrow<string>('db.url'),
     });
     super({ adapter, log: ['info', 'warn', 'error'] });
   }
@@ -30,7 +30,7 @@ export class DatabaseService
     } catch (err) {
       const isErrObject = err instanceof Error;
       this.logger.error(
-        `Prisma connection error: ${isErrObject ? err.message : err}`,
+        `Prisma connection error: ${isErrObject ? err.message : String(err)}`,
         isErrObject ? err.stack : undefined,
         DatabaseService.name,
       );
@@ -56,7 +56,7 @@ export class DatabaseService
     } catch (err) {
       const isErrObject = err instanceof Error;
       this.logger.error(
-        `Failed resetting the DB: ${isErrObject ? err.message : err}`,
+        `Failed resetting the DB: ${isErrObject ? err.message : String(err)}`,
         isErrObject ? err.stack : undefined,
         DatabaseService.name,
       );

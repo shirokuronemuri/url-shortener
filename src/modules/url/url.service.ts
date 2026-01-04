@@ -82,7 +82,7 @@ export class UrlService {
     const totalCount = await this.db.url.count({ ...(filter && whereClause) });
     const totalPages = Math.ceil(totalCount / limit);
     const { nextPage, previousPage } = generatePaginationLinks({
-      host: this.config.get('host') || '',
+      host: this.config.getOrThrow('app.host'),
       limit,
       page,
       filter,

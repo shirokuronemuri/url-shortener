@@ -11,6 +11,6 @@ export class AdminGuard implements CanActivate {
   ): boolean | Promise<boolean> | Observable<boolean> {
     const req = context.switchToHttp().getRequest<Request>();
     const token = req.headers['x-admin-secret'];
-    return token === this.config.get('adminSecret');
+    return token === this.config.get('app.adminSecret');
   }
 }
