@@ -10,13 +10,13 @@ import { ConfigService } from '@nestjs/config';
 import { IdGeneratorService } from 'src/services/id-generator/id-generator.service';
 import { DatabaseService } from 'src/services/database/database.service';
 import { Response } from 'express';
-import { QueryParamDto } from './dto/query-param.dto';
+import { QueryParamDto } from '../shared-dto/query-param.dto';
 import { generatePaginationLinks } from 'src/helpers/generate-pagination-links';
 import { CachedUrl } from './types/types';
 import { RedisService } from 'src/services/redis/redis.service';
 import dns from 'node:dns/promises';
 import ipaddr from 'ipaddr.js';
-import { PrismaClientKnownRequestError } from '@prisma/client/runtime/client';
+import { isPrismaUniqueConstraintError } from 'src/helpers/prisma-unique-constraint';
 
 @Injectable()
 export class UrlService {
@@ -45,8 +45,7 @@ export class UrlService {
           },
         });
       } catch (e) {
-        // unique constraint failed
-        if (e instanceof PrismaClientKnownRequestError && e.code === 'P2002') {
+        if (isPrismaUniqueConstraintError(e)) {
           continue;
         }
         throw e;

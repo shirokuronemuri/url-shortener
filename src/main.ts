@@ -23,6 +23,14 @@ async function bootstrap() {
       },
       'apiKey',
     )
+    .addApiKey(
+      {
+        type: 'apiKey',
+        name: 'x-admin-secret',
+        in: 'header',
+      },
+      'adminSecret',
+    )
     .addTag('Url', 'Manage and access short URLs')
     .addTag('Token', 'Get API token to access the rest of API')
     .build();

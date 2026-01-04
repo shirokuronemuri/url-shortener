@@ -23,11 +23,11 @@ import {
   ApiSecurity,
   ApiTemporaryRedirectResponse,
 } from '@nestjs/swagger';
-import { IdParamDto } from './dto/id-param.dto';
-import { QueryParamDto } from './dto/query-param.dto';
+import { IdParamDto } from '../shared-dto/id-param.dto';
+import { QueryParamDto } from '../shared-dto/query-param.dto';
 import { UrlArrayDto } from './dto/url-array.dto';
 import { TokenId } from 'src/decorators/token-id.decorator';
-import { AuthGuard } from '../token/auth/auth.guard';
+import { AuthGuard } from '../token/guards/auth/auth.guard';
 
 @Controller()
 export class UrlController {

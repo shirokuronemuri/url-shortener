@@ -16,16 +16,21 @@ export class AuthGuard implements CanActivate {
     if (!token || Array.isArray(token)) {
       return false;
     }
-    const hash = this.tokenService.hashValue(token);
-    const matchedToken = await this.db.token.findUnique({
-      where: {
-        hash,
-      },
-    });
-    if (!matchedToken) {
+    const [id, secret] = token.split('.');
+    if (!id || !secret) {
       return false;
     }
-    req.tokenId = matchedToken.id;
+
+    const hash = this.tokenService.hashValue(secret);
+    const matchedToken = await this.db.token.findUnique({
+      where: {
+        id,
+      },
+    });
+    if (!matchedToken || hash !== matchedToken.hash) {
+      return false;
+    }
+    req.tokenId = id;
 
     return true;
   }
