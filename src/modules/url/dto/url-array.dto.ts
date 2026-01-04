@@ -8,4 +8,6 @@ export const urlArraySchema = z.object({
   meta: metaSchema,
 });
 
-export class UrlArrayDto extends createZodDto(urlArraySchema) {}
+export class UrlArrayDto extends createZodDto(urlArraySchema, {
+  codec: true,
+}) {}

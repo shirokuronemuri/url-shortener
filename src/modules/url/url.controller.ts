@@ -16,7 +16,6 @@ import { CreateUrlDto } from './dto/create-url.dto';
 import { UpdateUrlDto } from './dto/update-url.dto';
 import { ZodResponse } from 'nestjs-zod';
 import { UrlDto } from './dto/url.dto';
-import { convertDates } from 'src/helpers/convert-dates';
 import type { Response } from 'express';
 import {
   ApiNoContentResponse,
@@ -42,7 +41,7 @@ export class UrlController {
     description: 'Creates new shortened url',
   })
   create(@Body() createUrlDto: CreateUrlDto, @TokenId() tokenId: string) {
-    return this.urlService.create(createUrlDto, tokenId).then(convertDates);
+    return this.urlService.create(createUrlDto, tokenId);
   }
 
   @Get('url')
@@ -53,15 +52,8 @@ export class UrlController {
     status: 200,
     description: 'Returns all created urls',
   })
-  async findAll(
-    @Query() queryParams: QueryParamDto,
-    @TokenId() tokenId: string,
-  ) {
-    const result = await this.urlService.findAll(queryParams, tokenId);
-    return {
-      data: result.data.map((url) => convertDates(url)),
-      meta: result.meta,
-    };
+  findAll(@Query() queryParams: QueryParamDto, @TokenId() tokenId: string) {
+    return this.urlService.findAll(queryParams, tokenId);
   }
 
   @Get('url/:id')
@@ -73,7 +65,7 @@ export class UrlController {
     description: 'Returns single url object by its short id',
   })
   findOne(@Param() { id }: IdParamDto, @TokenId() tokenId: string) {
-    return this.urlService.findOne(id, tokenId).then(convertDates);
+    return this.urlService.findOne(id, tokenId);
   }
 
   @Get(':id')
@@ -98,7 +90,7 @@ export class UrlController {
     @Body() updateUrlDto: UpdateUrlDto,
     @TokenId() tokenId: string,
   ) {
-    return this.urlService.update(id, updateUrlDto, tokenId).then(convertDates);
+    return this.urlService.update(id, updateUrlDto, tokenId);
   }
 
   @Delete('url/:id')
