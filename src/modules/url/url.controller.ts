@@ -33,26 +33,26 @@ import { AuthGuard } from '../token/guards/auth/auth.guard';
 export class UrlController {
   constructor(private readonly urlService: UrlService) {}
 
+  @Post('url')
+  @ApiSecurity('apiKey')
+  @UseGuards(AuthGuard)
   @ZodResponse({
     type: UrlDto,
     status: 201,
     description: 'Creates new shortened url',
   })
-  @Post('url')
-  @ApiSecurity('apiKey')
-  @UseGuards(AuthGuard)
   create(@Body() createUrlDto: CreateUrlDto, @TokenId() tokenId: string) {
     return this.urlService.create(createUrlDto, tokenId).then(convertDates);
   }
 
+  @Get('url')
+  @ApiSecurity('apiKey')
+  @UseGuards(AuthGuard)
   @ZodResponse({
     type: UrlArrayDto,
     status: 200,
     description: 'Returns all created urls',
   })
-  @Get('url')
-  @ApiSecurity('apiKey')
-  @UseGuards(AuthGuard)
   async findAll(
     @Query() queryParams: QueryParamDto,
     @TokenId() tokenId: string,
@@ -64,35 +64,35 @@ export class UrlController {
     };
   }
 
+  @Get('url/:id')
+  @ApiSecurity('apiKey')
+  @UseGuards(AuthGuard)
   @ZodResponse({
     type: UrlDto,
     status: 200,
     description: 'Returns single url object by its short id',
   })
-  @Get('url/:id')
-  @ApiSecurity('apiKey')
-  @UseGuards(AuthGuard)
   findOne(@Param() { id }: IdParamDto, @TokenId() tokenId: string) {
     return this.urlService.findOne(id, tokenId).then(convertDates);
   }
 
+  @Get(':id')
+  @HttpCode(301)
   @ApiTemporaryRedirectResponse({
     description: 'Redirects the user to the link stored in id',
   })
-  @HttpCode(301)
-  @Get(':id')
   redirect(@Param() { id }: IdParamDto, @Res() res: Response) {
     return this.urlService.redirect(id, res);
   }
 
+  @Patch('url/:id')
+  @ApiSecurity('apiKey')
+  @UseGuards(AuthGuard)
   @ZodResponse({
     type: UrlDto,
     status: 200,
     description: 'Returns updated url object',
   })
-  @Patch('url/:id')
-  @ApiSecurity('apiKey')
-  @UseGuards(AuthGuard)
   update(
     @Param() { id }: IdParamDto,
     @Body() updateUrlDto: UpdateUrlDto,
@@ -101,13 +101,13 @@ export class UrlController {
     return this.urlService.update(id, updateUrlDto, tokenId).then(convertDates);
   }
 
+  @Delete('url/:id')
+  @ApiSecurity('apiKey')
+  @UseGuards(AuthGuard)
+  @HttpCode(204)
   @ApiNoContentResponse({
     description: 'Removes the url',
   })
-  @Delete('url/:id')
-  @ApiSecurity('apiKey')
-  @HttpCode(204)
-  @UseGuards(AuthGuard)
   remove(@Param() { id }: IdParamDto, @TokenId() tokenId: string) {
     return this.urlService.remove(id, tokenId);
   }
