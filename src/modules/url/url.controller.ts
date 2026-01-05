@@ -25,7 +25,7 @@ import {
 import { IdParamDto } from '../shared-dto/id-param.dto';
 import { QueryParamDto } from '../shared-dto/query-param.dto';
 import { UrlArrayDto } from './dto/url-array.dto';
-import { TokenId } from 'src/decorators/token-id.decorator';
+import { TokenId } from 'src/modules/token/decorators/token-id.decorator';
 import { AuthGuard } from '../token/guards/auth/auth.guard';
 
 @Controller()
