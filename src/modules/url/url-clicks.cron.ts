@@ -1,7 +1,7 @@
 import { Injectable, OnModuleInit } from '@nestjs/common';
-import { ConfigService } from '@nestjs/config';
 import { SchedulerRegistry } from '@nestjs/schedule';
 import { CronJob } from 'cron';
+import { TypedConfigService } from 'src/config/typed-config.service';
 import { LoggerService } from 'src/core/services/logger/logger.service';
 import { DatabaseService } from 'src/services/database/database.service';
 import { RedisService } from 'src/services/redis/redis.service';
@@ -12,11 +12,11 @@ export class UrlClicksCron implements OnModuleInit {
     private readonly db: DatabaseService,
     private readonly redis: RedisService,
     private readonly logger: LoggerService,
-    private readonly config: ConfigService,
+    private readonly config: TypedConfigService,
     private readonly schedulerRegistry: SchedulerRegistry,
   ) {}
   onModuleInit() {
-    const schedule = this.config.getOrThrow<string>('cron.flushClicksInterval');
+    const schedule = this.config.get('cron.flushClicksInterval');
     const job = new CronJob(schedule, async () => {
       await this.flushClicks();
     });

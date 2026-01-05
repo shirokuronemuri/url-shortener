@@ -4,7 +4,7 @@ import helmet from 'helmet';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import { cleanupOpenApiDoc } from 'nestjs-zod';
 import { LoggerService } from './core/services/logger/logger.service';
-import { ConfigService } from '@nestjs/config';
+import { TypedConfigService } from './config/typed-config.service';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule, {
@@ -42,8 +42,8 @@ async function bootstrap() {
     },
   });
 
-  const config = app.get<ConfigService>(ConfigService);
-  const port = config.getOrThrow<number>('app.port');
+  const config = app.get<TypedConfigService>(TypedConfigService);
+  const port = config.get('app.port');
   await app.listen(port);
 }
 void bootstrap();

@@ -15,6 +15,7 @@ import { LoggerMiddleware } from './middlewares/logger/logger.middleware';
 import { DatabaseService } from 'src/services/database/database.service';
 import { RedisService } from 'src/services/redis/redis.service';
 import { RedisProvider } from 'src/services/redis/redis.provider';
+import { TypedConfigService } from 'src/config/typed-config.service';
 
 @Global()
 @Module({
@@ -45,8 +46,9 @@ import { RedisProvider } from 'src/services/redis/redis.provider';
     DatabaseService,
     RedisProvider,
     RedisService,
+    TypedConfigService,
   ],
-  exports: [LoggerService, DatabaseService, RedisService],
+  exports: [LoggerService, DatabaseService, RedisService, TypedConfigService],
 })
 export class CoreModule implements NestModule {
   configure(consumer: MiddlewareConsumer) {

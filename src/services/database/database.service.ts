@@ -5,8 +5,8 @@ import {
 } from '@nestjs/common';
 import { PrismaClient } from './generated/prisma/client';
 import { PrismaPg } from '@prisma/adapter-pg';
-import { ConfigService } from '@nestjs/config';
 import { LoggerService } from 'src/core/services/logger/logger.service';
+import { TypedConfigService } from 'src/config/typed-config.service';
 
 @Injectable()
 export class DatabaseService
@@ -14,11 +14,11 @@ export class DatabaseService
   implements OnModuleInit, OnModuleDestroy
 {
   constructor(
-    private readonly config: ConfigService,
+    private readonly config: TypedConfigService,
     private readonly logger: LoggerService,
   ) {
     const adapter = new PrismaPg({
-      connectionString: config.getOrThrow<string>('db.url'),
+      connectionString: config.get('db.url'),
     });
     super({ adapter, log: ['info', 'warn', 'error'] });
   }

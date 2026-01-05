@@ -1,6 +1,6 @@
 import { Injectable, InternalServerErrorException } from '@nestjs/common';
-import { ConfigService } from '@nestjs/config';
 import crypto from 'node:crypto';
+import { TypedConfigService } from 'src/config/typed-config.service';
 import { isPrismaUniqueConstraintError } from 'src/helpers/prisma-unique-constraint';
 import { DatabaseService } from 'src/services/database/database.service';
 import { IdGeneratorService } from 'src/services/id-generator/id-generator.service';
@@ -10,17 +10,15 @@ export class TokenService {
   constructor(
     private readonly db: DatabaseService,
     private readonly idGenerator: IdGeneratorService,
-    private readonly config: ConfigService,
+    private readonly config: TypedConfigService,
   ) {}
 
   async generateToken() {
     const secret = crypto.randomBytes(64).toString('base64url');
     const hash = this.hashValue(secret);
 
-    const maxRetries = this.config.getOrThrow<number>(
-      'url.tokenGenerationMaxRetries',
-    );
-    const tokenLength = this.config.getOrThrow<number>('url.tokenLength');
+    const maxRetries = this.config.get('url.tokenGenerationMaxRetries');
+    const tokenLength = this.config.get('url.tokenIdLength');
     for (let i = 0; i < maxRetries; ++i) {
       const id = this.idGenerator.generate(tokenLength);
       try {

@@ -6,7 +6,6 @@ import {
 } from '@nestjs/common';
 import { CreateUrlDto } from './dto/create-url.dto';
 import { UpdateUrlDto } from './dto/update-url.dto';
-import { ConfigService } from '@nestjs/config';
 import { IdGeneratorService } from 'src/services/id-generator/id-generator.service';
 import { DatabaseService } from 'src/services/database/database.service';
 import { Response } from 'express';
@@ -17,11 +16,12 @@ import { RedisService } from 'src/services/redis/redis.service';
 import dns from 'node:dns/promises';
 import ipaddr from 'ipaddr.js';
 import { isPrismaUniqueConstraintError } from 'src/helpers/prisma-unique-constraint';
+import { TypedConfigService } from 'src/config/typed-config.service';
 
 @Injectable()
 export class UrlService {
   constructor(
-    private readonly config: ConfigService,
+    private readonly config: TypedConfigService,
     private readonly idGenerator: IdGeneratorService,
     private readonly db: DatabaseService,
     private readonly redis: RedisService,
@@ -33,10 +33,8 @@ export class UrlService {
         'Specified redirect IP is in private range',
       );
     }
-    const maxRetries = this.config.getOrThrow<number>(
-      'url.urlGenerationMaxRetries',
-    );
-    const urlLength = this.config.getOrThrow<number>('url.urlLength');
+    const maxRetries = this.config.get('url.urlGenerationMaxRetries');
+    const urlLength = this.config.get('url.urlLength');
     for (let i = 0; i < maxRetries; ++i) {
       const id = this.idGenerator.generate(urlLength);
       try {
@@ -85,7 +83,7 @@ export class UrlService {
     const totalCount = await this.db.url.count({ ...(filter && whereClause) });
     const totalPages = Math.ceil(totalCount / limit);
     const { nextPage, previousPage } = generatePaginationLinks({
-      host: this.config.getOrThrow('app.host'),
+      host: this.config.get('app.host'),
       limit,
       page,
       filter,

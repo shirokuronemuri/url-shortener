@@ -3,7 +3,9 @@ import { appConfig } from './app.config';
 import { urlConfig } from './url.config';
 import { cronConfig } from './cron.config';
 
-export default () => {
+export type ConfigValues = ReturnType<typeof config>;
+
+const config = () => {
   const parsed = envSchema.safeParse(process.env);
   if (!parsed.success) {
     console.error('Failed parsing environment variables:');
@@ -24,3 +26,5 @@ export default () => {
     },
   };
 };
+
+export default config;
