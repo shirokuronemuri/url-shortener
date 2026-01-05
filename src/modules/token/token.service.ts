@@ -1,7 +1,7 @@
 import { Injectable, InternalServerErrorException } from '@nestjs/common';
 import crypto from 'node:crypto';
 import { TypedConfigService } from 'src/config/typed-config.service';
-import { isPrismaUniqueConstraintError } from 'src/helpers/prisma-unique-constraint';
+import { isPrismaUniqueConstraintError } from 'src/helpers/prisma/prisma-unique-constraint';
 import { DatabaseService } from 'src/services/database/database.service';
 import { IdGeneratorService } from 'src/services/id-generator/id-generator.service';
 

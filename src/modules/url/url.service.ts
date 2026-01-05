@@ -10,13 +10,16 @@ import { IdGeneratorService } from 'src/services/id-generator/id-generator.servi
 import { DatabaseService } from 'src/services/database/database.service';
 import { Response } from 'express';
 import { QueryParamDto } from '../shared-dto/query-param.dto';
-import { generatePaginationLinks } from 'src/helpers/generate-pagination-links';
+import { generatePaginationLinks } from 'src/helpers/pagination/generate-pagination-links';
 import { CachedUrl } from './types/types';
 import { RedisService } from 'src/services/redis/redis.service';
 import dns from 'node:dns/promises';
 import ipaddr from 'ipaddr.js';
-import { isPrismaUniqueConstraintError } from 'src/helpers/prisma-unique-constraint';
+import { isPrismaUniqueConstraintError } from 'src/helpers/prisma/prisma-unique-constraint';
 import { TypedConfigService } from 'src/config/typed-config.service';
+import { buildSearchClause } from 'src/helpers/pagination/build-search-clause';
+import { Url } from 'src/services/database/generated/prisma/client';
+import { paginate } from 'src/helpers/pagination/paginate';
 
 @Injectable()
 export class UrlService {
@@ -59,45 +62,31 @@ export class UrlService {
     { limit = 10, page = 1, filter }: QueryParamDto,
     tokenId: string,
   ) {
-    const whereClause = {
-      where: {
-        tokenId,
-        OR: [
-          {
-            title: { contains: filter },
-          },
-          {
-            description: { contains: filter },
-          },
-          {
-            redirect: { contains: filter },
-          },
-        ],
-      },
+    const where = {
+      tokenId,
+      ...buildSearchClause<Url>(filter, ['title', 'description', 'redirect']),
     };
-    const results = await this.db.url.findMany({
-      take: limit,
-      skip: (page - 1) * limit,
-      ...(filter && whereClause),
+
+    const pageResults = await paginate<Url>({
+      page,
+      limit,
+      fetch: (args) => this.db.url.findMany({ ...args, where }),
+      count: () => this.db.url.count({ where }),
     });
-    const totalCount = await this.db.url.count({ ...(filter && whereClause) });
-    const totalPages = Math.ceil(totalCount / limit);
-    const { nextPage, previousPage } = generatePaginationLinks({
+
+    const links = generatePaginationLinks({
       host: this.config.get('app.host'),
       limit,
       page,
       filter,
-      totalPages,
+      totalPages: pageResults.meta.totalPages,
     });
+
     return {
-      data: results,
+      data: pageResults.data,
       meta: {
-        totalCount,
-        currentPage: page,
-        totalPages,
-        perPage: limit,
-        nextPage,
-        previousPage,
+        ...pageResults.meta,
+        ...links,
       },
     };
   }
