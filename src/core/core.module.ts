@@ -16,6 +16,8 @@ import { DatabaseService } from 'src/services/database/database.service';
 import { RedisService } from 'src/services/redis/redis.service';
 import { RedisProvider } from 'src/services/redis/redis.provider';
 import { TypedConfigService } from 'src/config/typed-config.service';
+import { ScheduleModule } from '@nestjs/schedule';
+import { ThrottlerModule } from '@nestjs/throttler';
 
 @Global()
 @Module({
@@ -23,6 +25,22 @@ import { TypedConfigService } from 'src/config/typed-config.service';
     ConfigModule.forRoot({
       isGlobal: true,
       load: [config],
+    }),
+    ScheduleModule.forRoot(),
+    ThrottlerModule.forRoot({
+      throttlers: [
+        {
+          name: 'main',
+          ttl: 60 * 1000,
+          limit: 50,
+        },
+        {
+          name: 'burst',
+          ttl: 1000,
+          limit: 3,
+        },
+      ],
+      errorMessage: 'Too Many Requests',
     }),
   ],
   providers: [

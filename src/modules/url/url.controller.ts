@@ -27,7 +27,9 @@ import { QueryParamDto } from '../shared-dto/query-param.dto';
 import { UrlArrayDto } from './dto/url-array.dto';
 import { TokenId } from 'src/modules/token/decorators/token-id.decorator';
 import { AuthGuard } from '../token/guards/auth/auth.guard';
+import { Throttle, ThrottlerGuard } from '@nestjs/throttler';
 
+@UseGuards(ThrottlerGuard)
 @Controller()
 export class UrlController {
   constructor(private readonly urlService: UrlService) {}
@@ -35,6 +37,7 @@ export class UrlController {
   @Post('url')
   @ApiSecurity('apiKey')
   @UseGuards(AuthGuard)
+  @Throttle({ main: { ttl: 60 * 1000, limit: 10 } })
   @ZodResponse({
     type: UrlDto,
     status: 201,
@@ -69,6 +72,7 @@ export class UrlController {
   }
 
   @Get(':id')
+  @Throttle({ main: { ttl: 60 * 1000, limit: 100 } })
   @HttpCode(301)
   @ApiTemporaryRedirectResponse({
     description: 'Redirects the user to the link stored in id',
