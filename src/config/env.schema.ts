@@ -30,14 +30,14 @@ export const envSchema = z.object({
     z.string().optional(),
   ),
 
-  URL_GENERATION_MAX_RETRIES: z.preprocess(
+  URL_GENERATION_MAX_TRIES: z.preprocess(
     emptyToUndefined,
-    z.coerce.number().optional(),
+    z.coerce.number().min(1).optional(),
   ),
 
-  TOKEN_GENERATION_MAX_RETRIES: z.preprocess(
+  TOKEN_GENERATION_MAX_TRIES: z.preprocess(
     emptyToUndefined,
-    z.coerce.number().optional(),
+    z.coerce.number().min(1).optional(),
   ),
 });
 

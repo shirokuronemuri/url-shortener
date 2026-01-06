@@ -17,9 +17,9 @@ export class TokenService {
     const secret = crypto.randomBytes(64).toString('base64url');
     const hash = this.hashValue(secret);
 
-    const maxRetries = this.config.get('url.tokenGenerationMaxRetries');
+    const maxTries = this.config.get('url.tokenGenerationMaxTries');
     const tokenLength = this.config.get('url.tokenIdLength');
-    for (let i = 0; i < maxRetries; ++i) {
+    for (let i = 0; i < maxTries; ++i) {
       const id = this.idGenerator.generate(tokenLength);
       try {
         await this.db.token.create({

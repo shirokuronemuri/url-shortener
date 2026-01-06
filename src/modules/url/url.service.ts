@@ -36,9 +36,9 @@ export class UrlService {
         'Specified redirect IP is in private range',
       );
     }
-    const maxRetries = this.config.get('url.urlGenerationMaxRetries');
+    const maxTries = this.config.get('url.urlGenerationMaxTries');
     const urlLength = this.config.get('url.urlLength');
-    for (let i = 0; i < maxRetries; ++i) {
+    for (let i = 0; i < maxTries; ++i) {
       const id = this.idGenerator.generate(urlLength);
       try {
         return this.db.url.create({
