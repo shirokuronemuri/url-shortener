@@ -15,13 +15,19 @@ export const envSchema = z.object({
   HOST: z.preprocess(emptyToUndefined, z.url().optional()),
 
   // Optional config values
-  URL_LENGTH: z.preprocess(emptyToUndefined, z.coerce.number().optional()),
+  URL_LENGTH: z.preprocess(
+    emptyToUndefined,
+    z.coerce.number().min(3).max(128).optional(),
+  ),
 
-  TOKEN_ID_LENGTH: z.preprocess(emptyToUndefined, z.coerce.number().optional()),
+  TOKEN_ID_LENGTH: z.preprocess(
+    emptyToUndefined,
+    z.coerce.number().min(3).max(128).optional(),
+  ),
 
   CRON_FLUSH_CLICKS_INTERVAL: z.preprocess(
     emptyToUndefined,
-    z.string().trim().optional(),
+    z.string().optional(),
   ),
 
   URL_GENERATION_MAX_RETRIES: z.preprocess(

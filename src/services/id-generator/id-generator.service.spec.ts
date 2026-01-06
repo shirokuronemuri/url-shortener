@@ -1,18 +1,17 @@
-import { Test, TestingModule } from '@nestjs/testing';
 import { IdGeneratorService } from './id-generator.service';
+import { nanoid } from 'nanoid';
 
 describe('IdGeneratorService', () => {
-  let service: IdGeneratorService;
+  let idGeneratorService: IdGeneratorService;
 
-  beforeEach(async () => {
-    const module: TestingModule = await Test.createTestingModule({
-      providers: [IdGeneratorService],
-    }).compile();
-
-    service = module.get<IdGeneratorService>(IdGeneratorService);
+  beforeEach(() => {
+    idGeneratorService = new IdGeneratorService();
   });
 
-  it('should be defined', () => {
-    expect(service).toBeDefined();
+  it('should call nanoid with provided length', () => {
+    (nanoid as jest.Mock).mockReturnValue('abc');
+    const result = idGeneratorService.generate(8);
+    expect(nanoid).toHaveBeenCalledWith(8);
+    expect(result).toBe('abc');
   });
 });
