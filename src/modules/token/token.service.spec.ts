@@ -75,8 +75,7 @@ describe('TokenService', () => {
 
       const result = await tokenService.generateToken();
       expect(result.token).toContain('tokenId.');
-      const spy = jest.spyOn(db.token, 'create');
-      expect(spy).toHaveBeenCalled();
+      expect(db.token.create).toHaveBeenCalled();
     });
 
     it('should rethrow if unknown db error', async () => {
@@ -112,8 +111,7 @@ describe('TokenService', () => {
 
       const result = await tokenService.generateToken();
       expect(result.token).toContain('tokenId.');
-      const spy = jest.spyOn(db.token, 'create');
-      expect(spy).toHaveBeenCalledTimes(2);
+      expect(db.token.create).toHaveBeenCalledTimes(2);
     });
 
     it('should throw internal server exception when over limit', async () => {
@@ -146,8 +144,7 @@ describe('TokenService', () => {
 
       const result = await tokenService.revokeToken('id');
 
-      const spy = jest.spyOn(db.token, 'update');
-      expect(spy).toHaveBeenCalledWith({
+      expect(db.token.update).toHaveBeenCalledWith({
         where: { id: 'id' },
         data: { isRevoked: true },
       });

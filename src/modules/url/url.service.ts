@@ -13,13 +13,12 @@ import { QueryParamDto } from '../shared-dto/query-param.dto';
 import { generatePaginationLinks } from 'src/helpers/pagination/generate-pagination-links';
 import { CachedUrl } from './types/types';
 import { RedisService } from 'src/services/redis/redis.service';
-import dns from 'node:dns/promises';
-import ipaddr from 'ipaddr.js';
 import { isPrismaUniqueConstraintError } from 'src/helpers/prisma/prisma-unique-constraint';
 import { TypedConfigService } from 'src/config/typed-config.service';
 import { buildSearchClause } from 'src/helpers/pagination/build-search-clause';
 import { Url } from 'src/services/database/generated/prisma/client';
 import { paginate } from 'src/helpers/pagination/paginate';
+import { IpSafetyService } from 'src/services/ip-safety/ip-safety.service';
 
 @Injectable()
 export class UrlService {
@@ -28,10 +27,11 @@ export class UrlService {
     private readonly idGenerator: IdGeneratorService,
     private readonly db: DatabaseService,
     private readonly redis: RedisService,
+    private readonly ipSafetyService: IpSafetyService,
   ) {}
 
   async create(createUrlDto: CreateUrlDto, tokenId: string) {
-    if (await this.isPrivateIp(createUrlDto.redirect)) {
+    if (await this.ipSafetyService.isPrivateIp(createUrlDto.redirect)) {
       throw new BadRequestException(
         'Specified redirect IP is in private range',
       );
@@ -41,7 +41,7 @@ export class UrlService {
     for (let i = 0; i < maxTries; ++i) {
       const id = this.idGenerator.generate(urlLength);
       try {
-        return this.db.url.create({
+        return await this.db.url.create({
           data: {
             ...createUrlDto,
             url: id,
@@ -55,6 +55,7 @@ export class UrlService {
         throw e;
       }
     }
+
     throw new InternalServerErrorException('Failed to generate short url');
   }
 
@@ -114,6 +115,14 @@ export class UrlService {
   }
 
   async update(id: string, updateUrlDto: UpdateUrlDto, tokenId: string) {
+    if (
+      updateUrlDto.redirect &&
+      (await this.ipSafetyService.isPrivateIp(updateUrlDto.redirect))
+    ) {
+      throw new BadRequestException(
+        'Specified redirect IP is in private range',
+      );
+    }
     const url = await this.findOrThrow(id, tokenId);
     const updatedUrl = await this.db.url.update({
       where: {
@@ -150,29 +159,5 @@ export class UrlService {
     }
 
     return url;
-  }
-
-  private async isPrivateIp(url: string): Promise<boolean> {
-    try {
-      let hostname = new URL(url).hostname;
-      if (hostname.startsWith('[') && hostname.endsWith(']')) {
-        hostname = hostname.slice(1, -1);
-      }
-      const ips = await dns.lookup(hostname, { all: true });
-      const privateRanges = [
-        'private',
-        'loopback',
-        'linkLocal',
-        'uniqueLocal',
-        'unspecified',
-        'carrierGradeNat',
-      ];
-      return ips.some((ip) => {
-        const range = ipaddr.parse(ip.address).range();
-        return privateRanges.includes(range);
-      });
-    } catch {
-      return true;
-    }
   }
 }

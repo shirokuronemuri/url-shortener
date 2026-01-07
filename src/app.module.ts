@@ -1,12 +1,12 @@
 import { Module } from '@nestjs/common';
 import { CoreModule } from './core/core.module';
 import { UrlModule } from './modules/url/url.module';
-import { IdGeneratorModule } from './services/id-generator/id-generator.module';
 import { TokenModule } from './modules/token/token.module';
+import { IpSafetyService } from './services/ip-safety/ip-safety.service';
 
 @Module({
-  imports: [CoreModule, UrlModule, IdGeneratorModule, TokenModule],
+  imports: [CoreModule, UrlModule, TokenModule],
   controllers: [],
-  providers: [],
+  providers: [IpSafetyService],
 })
 export class AppModule {}

@@ -49,9 +49,7 @@ describe('AuthGuard', () => {
 
     const result = await authGuard.canActivate(context);
 
-    const findUnique = jest.spyOn(db.token, 'findUnique');
-
-    expect(findUnique).toHaveBeenCalledWith({
+    expect(db.token.findUnique).toHaveBeenCalledWith({
       where: { id: 'tokenId' },
     });
     expect(result).toBe(false);
@@ -72,9 +70,8 @@ describe('AuthGuard', () => {
     const context = mockExecutionContext(req);
 
     const result = await authGuard.canActivate(context);
-    const findUnique = jest.spyOn(db.token, 'findUnique');
 
-    expect(findUnique).toHaveBeenCalledWith({
+    expect(db.token.findUnique).toHaveBeenCalledWith({
       where: { id: 'tokenId' },
     });
     expect(result).toBe(true);
