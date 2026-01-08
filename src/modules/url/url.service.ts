@@ -77,6 +77,7 @@ export class UrlService {
 
     const links = generatePaginationLinks({
       host: this.config.get('app.host'),
+      endpoint: '/url',
       limit,
       page,
       filter,

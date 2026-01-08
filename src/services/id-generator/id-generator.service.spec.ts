@@ -8,10 +8,12 @@ describe('IdGeneratorService', () => {
     idGeneratorService = new IdGeneratorService();
   });
 
-  it('should call nanoid with provided length', () => {
-    (nanoid as jest.Mock).mockReturnValue('abc');
-    const result = idGeneratorService.generate(8);
-    expect(nanoid).toHaveBeenCalledWith(8);
-    expect(result).toBe('abc');
+  describe('generate()', () => {
+    it('should call nanoid with provided length', () => {
+      (nanoid as jest.Mock).mockReturnValue('abc');
+      const result = idGeneratorService.generate(8);
+      expect(nanoid).toHaveBeenCalledWith(8);
+      expect(result).toBe('abc');
+    });
   });
 });

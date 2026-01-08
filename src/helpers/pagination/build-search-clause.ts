@@ -2,7 +2,7 @@ export const buildSearchClause = <T extends object>(
   filter: string | undefined,
   fields: (keyof T)[],
 ) => {
-  if (!filter) {
+  if (!filter || fields.length === 0) {
     return undefined;
   }
 

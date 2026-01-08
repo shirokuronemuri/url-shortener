@@ -205,6 +205,7 @@ describe('UrlService', () => {
       );
       expect(generatePaginationLinks).toHaveBeenCalledWith({
         host: 'host',
+        endpoint: '/url',
         ...query,
         totalPages: meta.totalPages,
       });
