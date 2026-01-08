@@ -17,6 +17,7 @@ import { isPrismaUniqueConstraintError } from 'src/helpers/prisma/prisma-unique-
 import { buildSearchClause } from 'src/helpers/pagination/build-search-clause';
 import { paginate } from 'src/helpers/pagination/paginate';
 import { generatePaginationLinks } from 'src/helpers/pagination/generate-pagination-links';
+import { Response } from 'express';
 
 jest.mock('src/helpers/prisma/prisma-unique-constraint', () => ({
   isPrismaUniqueConstraintError: jest.fn(),
@@ -300,9 +301,105 @@ describe('UrlService', () => {
     });
   });
 
-  describe('redirect()', () => {});
+  describe('redirect()', () => {
+    it('should redirect without cache and db writes if cache hit', async () => {
+      const id = 'id';
+      const res = {
+        redirect: jest.fn(),
+      } as unknown as Response;
 
-  describe('update()', () => {});
+      redis.getJSON.mockResolvedValue({ redirect: 'cached-redirect' });
+      db.url.findUnique.mockResolvedValue({
+        redirect: 'uncached-redirect',
+      } as Url);
 
-  describe('remove()', () => {});
+      await urlService.redirect(id, res);
+      expect(redis.client.incr).toHaveBeenCalledWith('clicks:id');
+      expect(redis.getJSON).toHaveBeenCalledWith('redirect:id');
+      expect(res.redirect).toHaveBeenCalledWith('cached-redirect');
+      expect(db.url.findUnique).not.toHaveBeenCalled();
+      expect(redis.setJSON).not.toHaveBeenCalled();
+    });
+
+    it('should redirect with cache and db write if cache miss', async () => {
+      const id = 'id';
+      const res = {
+        redirect: jest.fn(),
+      } as unknown as Response;
+
+      redis.getJSON.mockResolvedValue(undefined);
+
+      db.url.findUnique.mockResolvedValue({
+        redirect: 'uncached-redirect',
+      } as Url);
+
+      await urlService.redirect(id, res);
+      expect(redis.client.incr).toHaveBeenCalledWith('clicks:id');
+      expect(redis.getJSON).toHaveBeenCalledWith('redirect:id');
+      expect(redis.setJSON).toHaveBeenCalledWith(
+        'redirect:id',
+        {
+          redirect: 'uncached-redirect',
+        },
+        3600,
+      );
+      expect(db.url.findUnique).toHaveBeenCalled();
+      expect(res.redirect).toHaveBeenCalledWith('uncached-redirect');
+    });
+  });
+
+  describe('update()', () => {
+    it('should throw if redirect is included in dto and ip is private', async () => {
+      const id = 'id';
+      const tokenId = 'tokenId';
+      const dto = { redirect: 'redirect' };
+      ipSafetyService.isPrivateIp.mockResolvedValue(true);
+
+      await expect(urlService.update(id, dto, tokenId)).rejects.toThrow(
+        BadRequestException,
+      );
+    });
+
+    it('should update url', async () => {
+      const urlId = 'id';
+      const tokenId = 'tokenId';
+      const dto = { redirect: 'redirect' };
+      ipSafetyService.isPrivateIp.mockResolvedValue(false);
+      db.url.findUnique.mockResolvedValue({ id: 1, url: urlId } as Url);
+      db.url.update.mockResolvedValue({ id: 1, url: urlId, ...dto } as Url);
+      const result = await urlService.update(urlId, dto, tokenId);
+
+      expect(result).toStrictEqual({
+        id: 1,
+        url: urlId,
+        ...dto,
+      });
+      expect(db.url.update).toHaveBeenCalledWith({
+        where: {
+          id: 1,
+        },
+        data: {
+          ...dto,
+        },
+      });
+      expect(redis.client.del).toHaveBeenLastCalledWith('redirect:id');
+    });
+  });
+
+  describe('remove()', () => {
+    it('should remove url from db', async () => {
+      const urlId = 'id';
+      const tokenId = 'tokenId';
+      db.url.findUnique.mockResolvedValue({ id: 1 } as Url);
+
+      await urlService.remove(urlId, tokenId);
+      expect(db.url.delete).toHaveBeenCalledWith({
+        where: {
+          id: 1,
+        },
+      });
+      expect(redis.client.del).toHaveBeenNthCalledWith(1, 'redirect:id');
+      expect(redis.client.del).toHaveBeenNthCalledWith(2, 'clicks:id');
+    });
+  });
 });
