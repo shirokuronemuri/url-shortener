@@ -159,11 +159,126 @@ describe('UrlService', () => {
   });
 
   describe('findAll()', () => {
-    it('should return paginated urls without filter', async () => {
-      (buildSearchClause as jest.Mock).mockReturnValue(undefined);
+    it('should process query and return the data and meta in right format', async () => {
+      const tokenId = 'token';
+      const query = {
+        page: 1,
+        limit: 10,
+      };
+      const urls = [
+        { id: 'a', title: 'nya1' },
+        { id: 'b', title: 'nya2' },
+      ];
+      const meta = {
+        currentPage: 1,
+        limit: 10,
+        totalCount: 2,
+        totalPages: 1,
+      };
 
-      (paginate as jest.Mock).mockReturnValue();
-      (generatePaginationLinks as jest.Mock).mockReturnValue();
+      (buildSearchClause as jest.Mock).mockReturnValue({});
+      (paginate as jest.Mock).mockImplementation(() => ({
+        data: urls,
+        meta,
+      }));
+      const pages = {
+        nextPage: null,
+        previousPage: null,
+      };
+      (generatePaginationLinks as jest.Mock).mockReturnValue(pages);
+      config.get.mockReturnValue('host');
+
+      const result = await urlService.findAll(query, tokenId);
+
+      expect(buildSearchClause).toHaveBeenCalledWith(undefined, [
+        'title',
+        'description',
+        'redirect',
+      ]);
+      expect(paginate).toHaveBeenCalledWith(
+        expect.objectContaining({
+          ...query,
+          fetch: expect.any(Function),
+          count: expect.any(Function),
+        }),
+      );
+      expect(generatePaginationLinks).toHaveBeenCalledWith({
+        host: 'host',
+        ...query,
+        totalPages: meta.totalPages,
+      });
+      expect(result).toStrictEqual({
+        data: urls,
+        meta: {
+          ...meta,
+          ...pages,
+        },
+      });
+    });
+
+    it('should wire pagination callbacks to db correctly', async () => {
+      const tokenId = 'token';
+      const query = { page: 1, limit: 10 };
+      let capturedFetch!: (args: any) => Promise<any>;
+      let capturedCount!: () => Promise<any>;
+      (paginate as jest.Mock).mockImplementation(async ({ fetch, count }) => {
+        capturedFetch = fetch;
+        capturedCount = count;
+        return {
+          data: [],
+          meta: {},
+        };
+      });
+
+      await urlService.findAll(query, tokenId);
+      await capturedFetch({ skip: 0, take: 10 });
+      await capturedCount();
+
+      expect(db.url.findMany).toHaveBeenCalledWith({
+        skip: 0,
+        take: 10,
+        where: { tokenId },
+      });
+      expect(db.url.count).toHaveBeenCalledWith({ where: { tokenId } });
+    });
+
+    it('should pass search clause to db when filter is present', async () => {
+      const tokenId = 'token';
+      const query = {
+        filter: 'filter',
+      };
+      const searchClause = {
+        OR: [{ title: { contains: 'filter', mode: 'insensitive' } }],
+      };
+      (buildSearchClause as jest.Mock).mockReturnValue(searchClause);
+      let capturedFetch!: (args: any) => Promise<any>;
+      (paginate as jest.Mock).mockImplementation(async ({ fetch }) => {
+        capturedFetch = fetch;
+        return {
+          data: [],
+          meta: {},
+        };
+      });
+      const pages = {
+        nextPage: null,
+        previousPage: null,
+      };
+      (generatePaginationLinks as jest.Mock).mockReturnValue(pages);
+      config.get.mockReturnValue('host');
+
+      await urlService.findAll(query, tokenId);
+      await capturedFetch({ skip: 0, take: 10 });
+
+      expect(buildSearchClause).toHaveBeenCalledWith('filter', [
+        'title',
+        'description',
+        'redirect',
+      ]);
+      expect(db.url.findMany).toHaveBeenCalledWith({
+        skip: 0,
+        take: 10,
+        where: { tokenId, ...searchClause },
+      });
     });
   });
 
@@ -184,4 +299,10 @@ describe('UrlService', () => {
       expect(db.url.findUnique).toHaveBeenCalled();
     });
   });
+
+  describe('redirect()', () => {});
+
+  describe('update()', () => {});
+
+  describe('remove()', () => {});
 });
