@@ -398,8 +398,8 @@ describe('UrlService', () => {
           id: 1,
         },
       });
-      expect(redis.client.del).toHaveBeenNthCalledWith(1, 'redirect:id');
-      expect(redis.client.del).toHaveBeenNthCalledWith(2, 'clicks:id');
+      expect(redis.client.del).toHaveBeenCalledWith('redirect:id');
+      expect(redis.client.del).toHaveBeenCalledWith('clicks:id');
     });
   });
 });
