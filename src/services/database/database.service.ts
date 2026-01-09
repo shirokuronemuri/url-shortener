@@ -40,6 +40,7 @@ export class DatabaseService
     await this.$disconnect();
     this.logger.log('Prisma disconnected from PostgreSQL');
   }
+
   async reset() {
     const tablenames = await this.$queryRaw<
       Array<{ tablename: string }>
