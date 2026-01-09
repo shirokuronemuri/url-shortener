@@ -1,14 +1,18 @@
-import { Inject, Injectable } from '@nestjs/common';
+import { Inject, Injectable, OnModuleDestroy } from '@nestjs/common';
 import Redis from 'ioredis';
 import { LoggerService } from 'src/core/services/logger/logger.service';
 import { REDIS_CLIENT } from './redis.provider';
 
 @Injectable()
-export class RedisService {
+export class RedisService implements OnModuleDestroy {
   constructor(
     @Inject(REDIS_CLIENT) public readonly client: Redis,
     private readonly logger: LoggerService,
   ) {}
+
+  async onModuleDestroy() {
+    await this.client.quit();
+  }
 
   /**
    * Stringify value and store it by key
