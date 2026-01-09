@@ -22,7 +22,6 @@ export default defineConfig(
         projectService: {
           allowDefaultProject: [
             'test/app.e2e-spec.ts',
-            'test/setup.ts',
             'prisma.config.ts',
             'eslint.config.ts',
           ],
