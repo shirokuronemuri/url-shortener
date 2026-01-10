@@ -29,7 +29,7 @@ export class LoggerService implements NestLogger {
 
     this.logger = winston.createLogger({
       format: logFormat,
-      // silent: config.get('app.environment') === 'test',
+      silent: config.get('app.environment') === 'test',
       transports: [new winston.transports.Console()],
     });
   }
