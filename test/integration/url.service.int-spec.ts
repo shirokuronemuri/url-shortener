@@ -18,10 +18,10 @@ describe('UrlService', () => {
     urlService = app.get(UrlService);
     db = app.get(DatabaseService);
     redis = app.get(RedisService);
+    tokenService = app.get(TokenService);
   });
 
   beforeEach(async () => {
-    tokenService = app.get(TokenService);
     const token = await tokenService.generateToken();
     tokenId = token.token.split('.')[0] ?? '';
   });

@@ -1,13 +1,24 @@
-export const populateUrlsPayload = (tokenId: string) => [
-  ...Array.from({ length: 8 }, (_, i) => ({
+import { nanoid } from 'nanoid';
+
+export const populateUrlsPayload = (
+  tokenId: string,
+  {
+    googleLinks,
+    youtubeLinks,
+  }: { googleLinks: number; youtubeLinks: number } = {
+    googleLinks: 8,
+    youtubeLinks: 7,
+  },
+) => [
+  ...Array.from({ length: googleLinks }, (_, i) => ({
     redirect: 'https://google.com',
-    url: `google-${i}`,
+    url: nanoid(8),
     title: 'Google',
     tokenId,
   })),
-  ...Array.from({ length: 7 }, (_, i) => ({
+  ...Array.from({ length: youtubeLinks }, (_, i) => ({
     redirect: 'https://youtube.com',
-    url: `youtube-${i}`,
+    url: nanoid(8),
     title: 'Youtube',
     tokenId,
   })),

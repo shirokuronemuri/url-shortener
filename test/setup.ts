@@ -5,6 +5,7 @@ import { AppModule } from './../src/app.module';
 import helmet from 'helmet';
 import { DatabaseService } from '../src/services/database/database.service';
 import { RedisService } from '../src/services/redis/redis.service';
+import { ThrottlerGuard } from '@nestjs/throttler';
 
 jest.unmock('nanoid');
 
@@ -16,7 +17,10 @@ let redis: RedisService;
 beforeAll(async () => {
   const moduleFixture: TestingModule = await Test.createTestingModule({
     imports: [AppModule],
-  }).compile();
+  })
+    .overrideGuard(ThrottlerGuard)
+    .useValue({ canActivate: () => true })
+    .compile();
 
   app = moduleFixture.createNestApplication();
   app.use(helmet());
