@@ -1,5 +1,5 @@
 import { createZodDto } from 'nestjs-zod';
-import { stringToDate } from 'src/modules/shared-dto/string-to-date.dto';
+import { stringToDate } from 'src/modules/shared-dto/string-to-date';
 import { z } from 'zod';
 
 export const urlSchema = z.object({
@@ -7,6 +7,7 @@ export const urlSchema = z.object({
   url: z.string(),
   title: z.string().nonempty(),
   description: z.string().nullable().optional(),
+  clicks: z.number().int().nonnegative(),
   createdAt: stringToDate,
   updatedAt: stringToDate,
 });

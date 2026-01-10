@@ -73,7 +73,7 @@ export class UrlController {
 
   @Get(':id')
   @Throttle({ main: { ttl: 60 * 1000, limit: 100 } })
-  @HttpCode(301)
+  @HttpCode(302)
   @ApiTemporaryRedirectResponse({
     description: 'Redirects the user to the link stored in id',
   })
