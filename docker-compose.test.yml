@@ -11,7 +11,7 @@ services:
     ports:
       - '5434:5432'
     volumes:
-      - postgres_data:/var/lib/postgresql/data
+      - postgres_test_data:/var/lib/postgresql/data
   
   url_shortener_redis_test:
     image: redis:alpine
@@ -21,12 +21,12 @@ services:
     ports:
       - '6381:6379'
     volumes:
-      - redis_data:/data
+      - redis_test_data:/data
 
 networks:
   default:
     name: url_shortener_test
 
 volumes:
-  postgres_data:
-  redis_data:
+  postgres_test_data:
+  redis_test_data:

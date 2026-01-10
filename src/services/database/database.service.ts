@@ -34,6 +34,9 @@ export class DatabaseService
         isErrObject ? err.stack : undefined,
         DatabaseService.name,
       );
+      if (this.config.get('app.environment') === 'test') {
+        process.exit(1);
+      }
     }
   }
   async onModuleDestroy() {
