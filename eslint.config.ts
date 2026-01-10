@@ -19,13 +19,6 @@ export default defineConfig(
       sourceType: 'commonjs',
       parserOptions: {
         tsconfigRootDir: import.meta.dirname,
-        projectService: {
-          allowDefaultProject: [
-            'test/app.e2e-spec.ts',
-            'prisma.config.ts',
-            'eslint.config.ts',
-          ],
-        },
       },
     },
   },

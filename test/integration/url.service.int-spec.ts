@@ -1,9 +1,9 @@
-import { DatabaseService } from 'src/services/database/database.service';
-import { RedisService } from 'src/services/redis/redis.service';
-import { app } from '../../../test/setup';
-import { UrlService } from './url.service';
-import { TokenService } from '../token/token.service';
-import { populateUrlsPayload } from '../../../test/test-utils';
+import { DatabaseService } from '../../src/services/database/database.service';
+import { RedisService } from '../../src/services/redis/redis.service';
+import { app } from '../setup';
+import { UrlService } from '../../src/modules/url/url.service';
+import { TokenService } from '../../src/modules/token/token.service';
+import { populateUrlsPayload } from '../test-utils';
 import { NotFoundException } from '@nestjs/common';
 import { Response } from 'express';
 

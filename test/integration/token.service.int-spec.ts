@@ -1,7 +1,7 @@
-import { DatabaseService } from 'src/services/database/database.service';
-import { TokenService } from './token.service';
-import { app } from '../../../test/setup';
+import { DatabaseService } from '../../src/services/database/database.service';
+import { app } from '../setup';
 import crypto from 'node:crypto';
+import { TokenService } from '../../src/modules/token/token.service';
 
 describe('TokenService', () => {
   let tokenService: TokenService;
