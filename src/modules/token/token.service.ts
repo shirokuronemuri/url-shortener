@@ -1,4 +1,8 @@
-import { Injectable, InternalServerErrorException } from '@nestjs/common';
+import {
+  Injectable,
+  InternalServerErrorException,
+  NotFoundException,
+} from '@nestjs/common';
 import crypto from 'node:crypto';
 import { TypedConfigService } from 'src/config/typed-config.service';
 import { isPrismaUniqueConstraintError } from 'src/helpers/prisma/prisma-unique-constraint';
@@ -44,6 +48,10 @@ export class TokenService {
   }
 
   async revokeToken(id: string) {
+    const token = await this.db.token.findUnique({ where: { id } });
+    if (!token) {
+      throw new NotFoundException();
+    }
     return this.db.token.update({ where: { id }, data: { isRevoked: true } });
   }
 }
