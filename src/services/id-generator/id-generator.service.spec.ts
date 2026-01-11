@@ -1,5 +1,8 @@
 import { IdGeneratorService } from './id-generator.service';
 import { nanoid } from 'nanoid';
+jest.mock('nanoid', () => ({
+  nanoid: jest.fn(),
+}));
 
 describe('IdGeneratorService', () => {
   let idGeneratorService: IdGeneratorService;

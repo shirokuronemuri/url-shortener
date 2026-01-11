@@ -7,8 +7,6 @@ import { DatabaseService } from '../src/services/database/database.service';
 import { RedisService } from '../src/services/redis/redis.service';
 import { ThrottlerGuard } from '@nestjs/throttler';
 
-jest.unmock('nanoid');
-
 let app: INestApplication<App>;
 let server: App;
 let databaseService: DatabaseService;
