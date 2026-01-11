@@ -14,13 +14,13 @@ jobs:
       - uses: ./.github/actions/build
       - name: Run tests
         run: pnpm test
-  e2e-tests:
+  int-e2e-tests:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
       - uses: ./.github/actions/build
-      - name: Run e2e tests
-        run: pnpm test:e2e
+      - name: Run integration and e2e tests
+        run: pnpm test:int-e2e:ci
         env:
           POSTGRES_USER: username
           POSTGRES_PASSWORD: password
