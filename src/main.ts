@@ -43,6 +43,7 @@ async function bootstrap() {
   SwaggerModule.setup('docs', app, cleanupOpenApiDoc(document), {
     swaggerOptions: {
       persistAuthorization: true,
+      defaultModelsExpandDepth: 5,
     },
   });
 

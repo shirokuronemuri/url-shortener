@@ -19,6 +19,7 @@ import { UrlDto } from './dto/url.dto';
 import type { Response } from 'express';
 import {
   ApiNoContentResponse,
+  ApiOperation,
   ApiSecurity,
   ApiTemporaryRedirectResponse,
 } from '@nestjs/swagger';
@@ -39,6 +40,9 @@ export class UrlController {
   @ApiSecurity('apiKey')
   @UseGuards(AuthGuard)
   @Throttle({ main: { ttl: 60 * 1000, limit: 10 } })
+  @ApiOperation({
+    summary: 'create a short url',
+  })
   @ZodResponse({
     type: UrlDto,
     status: 201,
@@ -52,6 +56,9 @@ export class UrlController {
   @Get('url')
   @ApiSecurity('apiKey')
   @UseGuards(AuthGuard)
+  @ApiOperation({
+    summary: 'get list of urls',
+  })
   @ZodResponse({
     type: UrlArrayDto,
     status: 200,
@@ -64,6 +71,9 @@ export class UrlController {
   @Get('url/:id')
   @ApiSecurity('apiKey')
   @UseGuards(AuthGuard)
+  @ApiOperation({
+    summary: 'get single url',
+  })
   @ZodResponse({
     type: UrlDto,
     status: 200,
@@ -77,6 +87,9 @@ export class UrlController {
   @Get(':id')
   @Throttle({ main: { ttl: 60 * 1000, limit: 100 } })
   @HttpCode(302)
+  @ApiOperation({
+    summary: 'redirect by url',
+  })
   @ApiTemporaryRedirectResponse({
     description: 'Redirects the user to the link stored in id',
   })
@@ -87,6 +100,9 @@ export class UrlController {
   @Patch('url/:id')
   @ApiSecurity('apiKey')
   @UseGuards(AuthGuard)
+  @ApiOperation({
+    summary: 'update url',
+  })
   @ZodResponse({
     type: UrlDto,
     status: 200,
@@ -105,6 +121,9 @@ export class UrlController {
   @ApiSecurity('apiKey')
   @UseGuards(AuthGuard)
   @HttpCode(204)
+  @ApiOperation({
+    summary: 'delete the url',
+  })
   @ApiNoContentResponse({
     description: 'Removes the url',
   })

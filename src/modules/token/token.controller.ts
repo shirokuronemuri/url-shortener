@@ -10,7 +10,11 @@ import { TokenService } from './token.service';
 import { ZodResponse } from 'nestjs-zod';
 import { IdParamDto } from '../shared-dto/id-param.dto';
 import { AdminGuard } from './guards/admin/admin.guard';
-import { ApiNoContentResponse, ApiSecurity } from '@nestjs/swagger';
+import {
+  ApiNoContentResponse,
+  ApiOperation,
+  ApiSecurity,
+} from '@nestjs/swagger';
 import { NewTokenDto } from './dto/new-token.dto';
 import { normalizeResponse } from 'src/helpers/response/normalize-response';
 
@@ -21,6 +25,9 @@ export class TokenController {
   @Post('')
   @ApiSecurity('adminSecret')
   @UseGuards(AdminGuard)
+  @ApiOperation({
+    summary: 'create auth token',
+  })
   @ZodResponse({
     type: NewTokenDto,
     status: 201,
@@ -35,6 +42,9 @@ export class TokenController {
   @ApiSecurity('adminSecret')
   @UseGuards(AdminGuard)
   @HttpCode(204)
+  @ApiOperation({
+    summary: 'revoke existing token',
+  })
   @ApiNoContentResponse({
     description: 'Revokes token, making it unusable',
   })
