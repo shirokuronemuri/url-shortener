@@ -28,11 +28,9 @@ beforeAll(async () => {
   server = app.getHttpServer();
   databaseService = app.get(DatabaseService);
   redis = app.get(RedisService);
-  await redis.client.flushdb();
-  await databaseService.reset();
 });
 
-afterEach(async () => {
+beforeEach(async () => {
   await redis.client.flushdb();
   await databaseService.reset();
 });
