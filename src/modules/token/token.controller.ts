@@ -25,9 +25,7 @@ export class TokenController {
   @Post('')
   @ApiSecurity('adminSecret')
   @UseGuards(AdminGuard)
-  @ApiOperation({
-    summary: 'create auth token',
-  })
+  @ApiOperation({ summary: 'create auth token' })
   @ZodResponse({
     type: NewTokenDto,
     status: 201,
@@ -42,9 +40,7 @@ export class TokenController {
   @ApiSecurity('adminSecret')
   @UseGuards(AdminGuard)
   @HttpCode(204)
-  @ApiOperation({
-    summary: 'revoke existing token',
-  })
+  @ApiOperation({ summary: 'revoke existing token' })
   @ApiNoContentResponse({
     description: 'Revokes token, making it unusable',
   })
