@@ -18,6 +18,7 @@ import { RedisProvider } from 'src/services/redis/redis.provider';
 import { TypedConfigService } from 'src/config/typed-config.service';
 import { ScheduleModule } from '@nestjs/schedule';
 import { ThrottlerModule } from '@nestjs/throttler';
+import { ThrottlerStorageRedisService } from '@nest-lab/throttler-storage-redis';
 
 @Global()
 @Module({
@@ -27,20 +28,24 @@ import { ThrottlerModule } from '@nestjs/throttler';
       load: [config],
     }),
     ScheduleModule.forRoot(),
-    ThrottlerModule.forRoot({
-      throttlers: [
-        {
-          name: 'main',
-          ttl: 60 * 1000,
-          limit: 50,
-        },
-        {
-          name: 'burst',
-          ttl: 1000,
-          limit: 3,
-        },
-      ],
-      errorMessage: 'Too Many Requests',
+    ThrottlerModule.forRootAsync({
+      inject: [TypedConfigService],
+      useFactory: (config: TypedConfigService) => ({
+        throttlers: [
+          {
+            name: 'main',
+            ttl: 60 * 1000,
+            limit: 50,
+          },
+          {
+            name: 'burst',
+            ttl: 1000,
+            limit: 3,
+          },
+        ],
+        errorMessage: 'Too Many Requests',
+        storage: new ThrottlerStorageRedisService(config.get('redis.url')),
+      }),
     }),
   ],
   providers: [
