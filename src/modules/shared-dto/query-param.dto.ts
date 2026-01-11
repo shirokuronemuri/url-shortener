@@ -1,11 +1,6 @@
 import { createZodDto } from 'nestjs-zod';
 import z from 'zod';
-
-const positiveQueryInt = z.preprocess((val) => {
-  if (typeof val !== 'string') return val;
-  const num = Number(val);
-  return Number.isNaN(num) ? val : num;
-}, z.number().int().positive());
+import { positiveQueryInt } from './positive-query-int';
 
 export const queryParamSchema = z.object({
   page: positiveQueryInt.optional(),
