@@ -12,6 +12,7 @@ import { IdParamDto } from '../shared-dto/id-param.dto';
 import { AdminGuard } from './guards/admin/admin.guard';
 import { ApiNoContentResponse, ApiSecurity } from '@nestjs/swagger';
 import { NewTokenDto } from './dto/new-token.dto';
+import { normalizeResponse } from 'src/helpers/response/normalize-response';
 
 @Controller('token')
 export class TokenController {
@@ -25,8 +26,9 @@ export class TokenController {
     status: 201,
     description: 'Creates new auth token for usage in other requests',
   })
-  generateToken() {
-    return this.tokenService.generateToken();
+  async generateToken() {
+    const result = await this.tokenService.generateToken();
+    return normalizeResponse(result);
   }
 
   @Delete(':id')

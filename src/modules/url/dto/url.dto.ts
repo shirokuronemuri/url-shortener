@@ -1,4 +1,5 @@
 import { createZodDto } from 'nestjs-zod';
+import { singleResponse } from 'src/modules/shared-dto/response-wrapper';
 import { stringToDate } from 'src/modules/shared-dto/string-to-date';
 import { z } from 'zod';
 
@@ -12,4 +13,6 @@ export const urlSchema = z.object({
   updatedAt: stringToDate,
 });
 
-export class UrlDto extends createZodDto(urlSchema, { codec: true }) {}
+const wrap = singleResponse(urlSchema);
+
+export class UrlDto extends createZodDto(wrap, { codec: true }) {}

@@ -1,3 +1,4 @@
+import { createZodDto } from 'nestjs-zod';
 import z from 'zod';
 
 export const metaSchema = z.object({
@@ -8,3 +9,5 @@ export const metaSchema = z.object({
   nextPage: z.string().nullable(),
   previousPage: z.string().nullable(),
 });
+
+export class MetaDto extends createZodDto(metaSchema) {}

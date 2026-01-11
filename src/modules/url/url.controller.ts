@@ -28,6 +28,7 @@ import { UrlArrayDto } from './dto/url-array.dto';
 import { TokenId } from 'src/modules/token/decorators/token-id.decorator';
 import { AuthGuard } from '../token/guards/auth/auth.guard';
 import { Throttle, ThrottlerGuard } from '@nestjs/throttler';
+import { normalizeResponse } from 'src/helpers/response/normalize-response';
 
 @UseGuards(ThrottlerGuard)
 @Controller()
@@ -43,8 +44,9 @@ export class UrlController {
     status: 201,
     description: 'Creates new shortened url',
   })
-  create(@Body() createUrlDto: CreateUrlDto, @TokenId() tokenId: string) {
-    return this.urlService.create(createUrlDto, tokenId);
+  async create(@Body() createUrlDto: CreateUrlDto, @TokenId() tokenId: string) {
+    const result = await this.urlService.create(createUrlDto, tokenId);
+    return normalizeResponse(result);
   }
 
   @Get('url')
@@ -67,8 +69,9 @@ export class UrlController {
     status: 200,
     description: 'Returns single url object by its short id',
   })
-  findOne(@Param() { id }: IdParamDto, @TokenId() tokenId: string) {
-    return this.urlService.findOne(id, tokenId);
+  async findOne(@Param() { id }: IdParamDto, @TokenId() tokenId: string) {
+    const result = await this.urlService.findOne(id, tokenId);
+    return normalizeResponse(result);
   }
 
   @Get(':id')
@@ -89,12 +92,13 @@ export class UrlController {
     status: 200,
     description: 'Returns updated url object',
   })
-  update(
+  async update(
     @Param() { id }: IdParamDto,
     @Body() updateUrlDto: UpdateUrlDto,
     @TokenId() tokenId: string,
   ) {
-    return this.urlService.update(id, updateUrlDto, tokenId);
+    const result = await this.urlService.update(id, updateUrlDto, tokenId);
+    return normalizeResponse(result);
   }
 
   @Delete('url/:id')

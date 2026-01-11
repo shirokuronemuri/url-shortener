@@ -7,7 +7,6 @@ import {
 import { ConfigModule } from '@nestjs/config';
 import { APP_FILTER, APP_INTERCEPTOR, APP_PIPE } from '@nestjs/core';
 import config from 'src/config';
-import { TransformResponseInterceptor } from './interceptors/transform-response/transform-response.interceptor';
 import { ZodSerializerInterceptor, ZodValidationPipe } from 'nestjs-zod';
 import { HttpExceptionFilter } from './filters/http-exception/http-exception.filter';
 import { LoggerService } from './services/logger/logger.service';
@@ -52,10 +51,6 @@ import { ThrottlerStorageRedisService } from '@nest-lab/throttler-storage-redis'
     {
       provide: APP_PIPE,
       useClass: ZodValidationPipe,
-    },
-    {
-      provide: APP_INTERCEPTOR,
-      useClass: TransformResponseInterceptor,
     },
     {
       provide: APP_INTERCEPTOR,
