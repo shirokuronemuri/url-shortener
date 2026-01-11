@@ -141,6 +141,7 @@ describe('TokenService', () => {
         updatedAt: new Date(),
       };
       db.token.update.mockResolvedValue(dbObject);
+      db.token.findUnique.mockResolvedValue(dbObject);
 
       const result = await tokenService.revokeToken('id');
 
