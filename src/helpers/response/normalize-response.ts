@@ -1,5 +1,3 @@
-import { MetaDto } from 'src/modules/shared-dto/meta';
-
 type WrappedResponse<T> = {
   data: T;
   meta?: any;

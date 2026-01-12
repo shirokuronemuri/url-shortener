@@ -4,7 +4,7 @@
     "json",
     "ts"
   ],
-  "rootDir": "../",
+  "rootDir": ".",
   "testEnvironment": "node",
   "testRegex": "(.e2e-spec.ts$|.int-spec.ts$)",
   "transform": {
@@ -14,10 +14,10 @@
     "dotenv/config"
   ],
   "moduleNameMapper": {
-    "^src/(.*)$": "<rootDir>/src/$1"
+    "^src/(.*)$": "<rootDir>/../src/$1"
   },
   "setupFilesAfterEnv": [
-    "./test/setup.ts"
+    "./setup.ts"
   ],
   "modulePathIgnorePatterns": [
     "<rootDir>/dist/"

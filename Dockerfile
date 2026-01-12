@@ -14,6 +14,4 @@ COPY . .
 
 RUN pnpm build
 
-EXPOSE 6100
-
 CMD ["pnpm", "start:prod"]

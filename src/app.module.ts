@@ -7,6 +7,6 @@ import { IpSafetyService } from './services/ip-safety/ip-safety.service';
 @Module({
   imports: [CoreModule, UrlModule, TokenModule],
   controllers: [],
-  providers: [IpSafetyService],
+  providers: [],
 })
 export class AppModule {}
