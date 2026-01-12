@@ -21,8 +21,8 @@ export const paginate = async <T>({
 }: {
   page: number;
   limit: number;
-  fetch: (args: FindManyArgs) => Promise<T[]>;
-  count: () => Promise<number>;
+  fetch: (args: FindManyArgs) => T[] | Promise<T[]>;
+  count: () => number | Promise<number>;
 }): Promise<PageResults<T>> => {
   const data = await fetch({ take: limit, skip: (page - 1) * limit });
   const totalCount = await count();

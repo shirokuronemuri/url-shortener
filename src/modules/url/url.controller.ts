@@ -60,8 +60,12 @@ export class UrlController {
     status: 200,
     description: 'Returns all created urls',
   })
-  findAll(@Query() queryParams: QueryParamDto, @TokenId() tokenId: string) {
-    return this.urlService.findAll(queryParams, tokenId);
+  async findAll(
+    @Query() queryParams: QueryParamDto,
+    @TokenId() tokenId: string,
+  ) {
+    const result = await this.urlService.findAll(queryParams, tokenId);
+    return normalizeResponse(result);
   }
 
   @Get('url/:id')
