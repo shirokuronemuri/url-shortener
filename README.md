@@ -49,8 +49,6 @@ $ pnpm start:dev
 
 - if using github actions for build, modify deploy.yml for your needs, set the required repository secrets and run the workflow
 
-5. 
-
 To stop production server run: 
 
 ```bash

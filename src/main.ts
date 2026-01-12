@@ -17,7 +17,7 @@ async function bootstrap() {
     .setTitle('Url shortener')
     .setDescription(
       `Shorten your urls with this super convenient API! 
-      Url clicks are counted with redis and flushed into db with a cron job.`,
+      Url clicks are counted with redis and periodically flushed into db with a cron job.`,
     )
     .setVersion('1.0')
     .addApiKey(
