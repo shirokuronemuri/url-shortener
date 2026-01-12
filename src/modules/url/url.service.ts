@@ -68,7 +68,7 @@ export class UrlService {
       ...buildSearchClause<Url>(filter, ['title', 'description', 'redirect']),
     };
 
-    const pageResults = await paginate<Url>({
+    const paginatedResult = await paginate<Url>({
       page,
       limit,
       fetch: (args) => this.db.url.findMany({ ...args, where }),
@@ -81,13 +81,13 @@ export class UrlService {
       limit,
       page,
       filter,
-      totalPages: pageResults.meta.totalPages,
+      totalPages: paginatedResult.meta.totalPages,
     });
 
     return {
-      data: pageResults.data,
+      data: paginatedResult.data,
       meta: {
-        ...pageResults.meta,
+        ...paginatedResult.meta,
         ...links,
       },
     };
