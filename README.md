@@ -17,7 +17,7 @@ Create `.env` file based on `.env.example`, then:
 $ pnpm install
 
 # Run required docker containers
-$ pnpm d:up
+$ pnpm d:up:dev
 
 # apply migrations and generate prisma client
 $ pnpm db:m:dev
